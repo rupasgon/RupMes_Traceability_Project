@@ -1,0 +1,19 @@
+[Unit]
+Description=RupMES Edge OPC UA dashboard
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=itsys
+Group=itsys
+EnvironmentFile=/etc/rupmes-edge/environment
+Environment=PYTHONPATH=/opt/rupmes-edge/src
+ExecStart=/opt/rupmes-edge/.venv/bin/python -m rupmes_edge dashboard --config /etc/rupmes-edge/config.json
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

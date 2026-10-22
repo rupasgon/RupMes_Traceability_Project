@@ -8,17 +8,18 @@
       :root { color-scheme: dark; --ink:#edf6f1; --muted:#9bb0a5; --panel:#15221d; --panel-2:#101a16; --line:#2b4137; --run:#35c77a; --idle:#e8b84b; --fault:#ef6060; --manual:#57a6e7; --down:#77847d; --accent:#7ad8ad; }
       * { box-sizing:border-box; } body { margin:0; min-height:100vh; color:var(--ink); font-family:"Segoe UI",system-ui,sans-serif; background:radial-gradient(circle at top left,#244f40 0,transparent 34%),#0a120f; }
       header { padding:27px 4vw 20px; display:flex; justify-content:space-between; gap:18px; align-items:flex-end; border-bottom:1px solid var(--line); } h1 { margin:2px 0 0; letter-spacing:.035em; font-size:clamp(1.7rem,3vw,2.7rem); } h2,h3,p { margin-top:0; } .eyebrow,.muted,.label { color:var(--muted); } .eyebrow,.label { font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; font-weight:700; } .status { font-weight:700; padding:9px 13px; border:1px solid #365849; border-radius:999px; background:#152a21; white-space:nowrap; }
-      .kpis { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; padding:20px 4vw; } .kpi,.station,.side-card { border:1px solid var(--line); border-radius:14px; background:linear-gradient(140deg,var(--panel),var(--panel-2)); } .kpi { padding:15px; min-height:105px; } .kpi strong { display:block; margin:7px 0 2px; font-size:1.7rem; line-height:1; } .kpi .detail { color:var(--muted); font-size:.82rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-      .layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(270px,22vw); gap:17px; padding:0 4vw 4vw; } .stations { display:grid; grid-template-columns:repeat(auto-fit,minmax(255px,1fr)); gap:14px; } .station { padding:17px; border-left:7px solid var(--down); min-height:245px; } .station.RUNNING { border-left-color:var(--run); } .station.IDLE { border-left-color:var(--idle); } .station.FAULT,.station.STOPPED { border-left-color:var(--fault); } .station.MANUAL { border-left-color:var(--manual); } .station-head { display:flex; justify-content:space-between; gap:9px; align-items:flex-start; } .station h2 { margin:0; font-size:1.1rem; } .station-code { margin-top:3px; color:var(--muted); font-size:.8rem; } .pill { font-size:.7rem; border:1px solid currentColor; border-radius:99px; padding:4px 8px; font-weight:700; } .output { color:var(--accent); font-size:.68rem; letter-spacing:.07em; font-weight:700; margin-top:8px; }
+      .kpis { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:12px; padding:20px 4vw; } #production-counter-cards { display:contents; } .kpi,.station,.side-card { border:1px solid var(--line); border-radius:14px; background:linear-gradient(140deg,var(--panel),var(--panel-2)); } .kpi { padding:15px; min-height:105px; } .kpi strong { display:block; margin:7px 0 2px; font-size:1.7rem; line-height:1; } .kpi .detail { color:var(--muted); font-size:.82rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .kpi .detail + .detail { margin-top:4px; font-size:.72rem; }
+      .header-actions { display:flex; gap:10px; align-items:center; } .settings-button { border:1px solid #527566; border-radius:8px; padding:9px 12px; color:var(--ink); background:#173127; font-weight:700; cursor:pointer; }
+      .layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(270px,22vw); gap:17px; padding:0 4vw 4vw; } .stations { display:grid; grid-template-columns:repeat(auto-fit,minmax(255px,1fr)); gap:14px; } .station { padding:17px; border-left:7px solid var(--down); min-height:245px; } .station.RUNNING { border-left-color:var(--run); } .station.STANDBY { border-left-color:var(--down); } .station.IDLE { border-left-color:var(--idle); } .station.FAULT,.station.STOPPED { border-left-color:var(--fault); } .station.MANUAL { border-left-color:var(--manual); } .station-head { display:flex; justify-content:space-between; gap:9px; align-items:flex-start; } .station h2 { margin:0; font-size:1.1rem; } .station-code { margin-top:3px; color:var(--muted); font-size:.8rem; } .pill { font-size:.7rem; border:1px solid currentColor; border-radius:99px; padding:4px 8px; font-weight:700; } .output { color:var(--accent); font-size:.68rem; letter-spacing:.07em; font-weight:700; margin-top:8px; }
       .station-grid { display:grid; grid-template-columns:1fr 1fr; gap:13px; margin-top:19px; } .value { margin-top:3px; font-size:1.2rem; } .value.negative { color:#ff9696; } .station-footer { display:flex; justify-content:space-between; gap:12px; margin-top:18px; padding-top:12px; border-top:1px solid var(--line); color:var(--muted); font-size:.78rem; } .fault-note { margin-top:14px; color:#ff9696; font-size:.88rem; font-weight:700; }
       aside { display:grid; align-content:start; gap:14px; } .side-card { padding:16px; } .side-card h3 { font-size:1rem; margin-bottom:14px; } .issue,.endpoint { border-top:1px solid var(--line); padding:11px 0; } .issue:first-of-type,.endpoint:first-of-type { border-top:0; padding-top:0; } .issue strong,.endpoint strong { display:block; font-size:.9rem; } .issue span,.endpoint span { color:var(--muted); display:block; font-size:.8rem; margin-top:3px; } .indicator { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; background:var(--down); } .indicator.good { background:var(--run); } .indicator.bad { background:var(--fault); } .empty { color:var(--muted); font-size:.88rem; }
-      @media (max-width:1050px) { .kpis { grid-template-columns:repeat(3,minmax(0,1fr)); } .layout { grid-template-columns:1fr; } aside { grid-template-columns:repeat(2,minmax(0,1fr)); } } @media (max-width:620px) { header { flex-direction:column; align-items:flex-start; } .kpis,aside { grid-template-columns:1fr; } .layout { padding-bottom:24px; } }
+      @media (max-width:1250px) { .kpis { grid-template-columns:repeat(4,minmax(0,1fr)); } } @media (max-width:1050px) { .kpis { grid-template-columns:repeat(3,minmax(0,1fr)); } .layout { grid-template-columns:1fr; } aside { grid-template-columns:repeat(2,minmax(0,1fr)); } } @media (max-width:620px) { header { flex-direction:column; align-items:flex-start; } .kpis,aside { grid-template-columns:1fr; } .layout { padding-bottom:24px; } }
     </style>
   </head>
   <body>
-    <header><div><div class="eyebrow">RupMES Edge · local read-only dashboard</div><h1 id="line-name">RupMES Edge</h1></div><div id="connection" class="status">CONNECTING</div></header>
+    <header><div><div class="eyebrow">RupMES Edge · local dashboard</div><h1 id="line-name">RupMES Edge</h1></div><div class="header-actions"><button id="edge-settings" class="settings-button" type="button">Configuration</button><div id="connection" class="status">CONNECTING</div></div></header>
     <section class="kpis">
-      <div class="kpi"><span class="label">Line output</span><strong id="line-parts">--</strong><span id="line-parts-detail" class="detail">Output station not configured</span></div>
+      <div id="production-counter-cards"></div>
       <div class="kpi"><span class="label">Stations running</span><strong id="running">0 / 0</strong><span id="running-detail" class="detail">--</span></div>
       <div class="kpi"><span class="label">Active alarms</span><strong id="alarms">0</strong><span id="alarms-detail" class="detail">No active faults</span></div>
       <div class="kpi"><span class="label">Observed cycles</span><strong id="cycles">0</strong><span id="cycles-detail" class="detail">0 over target</span></div>
@@ -32,17 +33,45 @@
       const stationCard = station => {
         const deviation = station.cycle_deviation_seconds;
         const mode = station.auto_mode === false ? 'Manual' : station.auto_mode === true ? 'Automatic' : 'Mode unavailable';
-        return `<article class="station ${escape(station.state)}"><div class="station-head"><div><h2>${escape(station.name)}</h2><div class="station-code">${escape(station.id)}</div>${station.is_output_station ? '<div class="output">LINE OUTPUT STATION</div>' : ''}</div><span class="pill">${escape(station.state)}</span></div><div class="station-grid"><div><div class="label">Last cycle</div><div class="value">${number(station.last_cycle_seconds)} s</div></div><div><div class="label">Target</div><div class="value">${number(station.target_cycle_seconds)} s</div></div><div><div class="label">Deviation</div><div class="value ${deviation > 0 ? 'negative' : ''}">${deviation == null ? '--' : `${deviation > 0 ? '+' : ''}${number(deviation)} s`}</div></div><div><div class="label">Parts counter</div><div class="value">${station.parts_counter ?? '--'}</div></div><div><div class="label">Average cycle</div><div class="value">${number(station.average_cycle_seconds)} s</div></div><div><div class="label">Cycles over target</div><div class="value">${station.cycles_over_target}</div></div></div>${station.alarm_code ? `<div class="fault-note">ACTIVE ALARM · ${escape(station.alarm_code)}</div>` : ''}<div class="station-footer"><span>${mode}</span><span>Updated ${time(station.last_update)}</span></div></article>`;
+        const displayedCycle = station.last_cycle_seconds ?? station.current_cycle_seconds;
+        return `<article class="station ${escape(station.state)}"><div class="station-head"><div><h2>${escape(station.name)}</h2><div class="station-code">${escape(station.id)}</div>${station.is_output_station ? '<div class="output">LINE OUTPUT STATION</div>' : ''}</div><span class="pill">${escape(station.state)}</span></div><div class="station-grid"><div><div class="label">PLC cycle time</div><div class="value">${number(displayedCycle)} s</div></div><div><div class="label">Target</div><div class="value">${number(station.target_cycle_seconds)} s</div></div><div><div class="label">Deviation</div><div class="value ${deviation > 0 ? 'negative' : ''}">${deviation == null ? '--' : `${deviation > 0 ? '+' : ''}${number(deviation)} s`}</div></div><div><div class="label">NOK counter</div><div class="value">${station.parts_counter ?? '--'}</div></div><div><div class="label">Average cycle</div><div class="value">${number(station.average_cycle_seconds)} s</div></div><div><div class="label">Cycles over target</div><div class="value">${station.cycles_over_target}</div></div></div>${station.alarm_code ? `<div class="fault-note">ACTIVE ALARM · ${escape(station.alarm_code)}</div>` : ''}<div class="station-footer"><span>${mode}</span><span>Updated ${time(station.last_update)}</span></div></article>`;
       };
+      function renderLineCycle(lineCycle) {
+        let card = document.querySelector('#line-cycle-kpi');
+        if (!lineCycle) {
+          card?.remove();
+          return;
+        }
+        if (!card) {
+          card = document.createElement('div');
+          card.id = 'line-cycle-kpi';
+          card.className = 'kpi';
+          document.querySelector('.kpis')?.prepend(card);
+        }
+        const current = lineCycle.current_cycle_seconds;
+        const target = lineCycle.target_cycle_seconds;
+        const deviation = Number.isFinite(Number(current)) ? Number(current) - Number(target) : null;
+        const deviationText = deviation == null ? 'Waiting for PLC value' : `${deviation > 0 ? '+' : ''}${number(deviation)} s vs target`;
+        const averageText = lineCycle.average_cycle_seconds == null ? 'No completed line cycles yet' : `${number(lineCycle.average_cycle_seconds)} s average · ${lineCycle.cycles_over_target} over target`;
+        card.innerHTML = `<span class="label">Line cycle time</span><strong>${current == null ? '--' : `${number(current)} s`}</strong><span class="detail" style="color:${deviation > 0 ? '#ff9696' : ''}">${number(target)} s target · ${deviationText}</span><span class="detail">${averageText}</span>`;
+      }
       async function refresh() {
         try {
           const response = await fetch('/edge/api/snapshot', {cache:'no-store'});
           if (!response.ok) throw new Error('Snapshot unavailable');
           const data = await response.json(); const counts = data.state_counts || {};
+          renderLineCycle(data.line_cycle);
           document.querySelector('#line-name').textContent = data.line_name;
           const connection = document.querySelector('#connection'); connection.textContent = data.connection.connected ? 'OPC UA CONNECTED' : 'OPC UA DEGRADED'; connection.style.color = data.connection.connected ? '#72e5a7' : '#ff9696';
-          document.querySelector('#line-parts').textContent = data.line_parts ?? '--'; document.querySelector('#line-parts-detail').textContent = data.line_parts_station ? `From ${data.line_parts_station}` : 'Output station not configured';
-          document.querySelector('#running').textContent = `${counts.RUNNING || 0} / ${data.stations.length}`; document.querySelector('#running-detail').textContent = `${counts.IDLE || 0} idle · ${counts.MANUAL || 0} manual`;
+          const counters = Array.isArray(data.production_counters) ? data.production_counters : [];
+          const counter = value => value == null ? '--' : Number(value).toLocaleString(undefined, {maximumFractionDigits:0});
+          const rate = value => value == null ? '--' : Number(value).toLocaleString(undefined, {maximumFractionDigits:0});
+          document.querySelector('#production-counter-cards').innerHTML = counters.map(item => {
+            const quality = item.ok == null && item.nok == null ? 'OK/NOK unavailable' : `OK ${counter(item.ok)} · NOK ${counter(item.nok)}`;
+            const detail = `${quality} · ${rate(item.pieces_per_hour)} p/h`;
+            return `<div class="kpi"><span class="label">${escape(item.name)}</span><strong>${counter(item.quantity)}</strong><span class="detail">${detail}</span></div>`;
+          }).join('');
+          document.querySelector('#running').textContent = `${counts.RUNNING || 0} / ${data.stations.length}`; document.querySelector('#running-detail').textContent = `${counts.STANDBY || 0} standby · ${counts.IDLE || 0} idle · ${counts.MANUAL || 0} manual`;
           document.querySelector('#alarms').textContent = data.active_alarms; document.querySelector('#alarms-detail').textContent = data.active_alarms ? `${data.active_alarms} station(s) in fault` : 'No active faults';
           document.querySelector('#cycles').textContent = data.completed_cycles; document.querySelector('#cycles-detail').textContent = `${data.cycles_over_target} over target`;
           document.querySelector('#bottleneck').textContent = data.bottleneck ? data.bottleneck.name : '--'; document.querySelector('#bottleneck-detail').textContent = data.bottleneck ? `${number(data.bottleneck.average_cycle_seconds)} s average / ${number(data.bottleneck.target_cycle_seconds)} s target` : 'Waiting for cycles';
@@ -56,9 +85,9 @@
   <style>
     .station, .station-card { cursor:pointer; }
     .station:focus, .station-card:focus { outline:2px solid #6ea7ff; outline-offset:3px; }
-    #station-history-modal[hidden] { display:none; }
-    #station-history-modal { position:fixed; inset:0; z-index:100; padding:clamp(14px,4vw,48px); background:#020713cc; overflow:auto; }
-    .history-dialog { max-width:1120px; margin:auto; padding:22px; border:1px solid #344661; border-radius:14px; background:#0b1728; box-shadow:0 20px 80px #000a; }
+    #station-history-modal[hidden],#edge-config-modal[hidden] { display:none; }
+    #station-history-modal,#edge-config-modal { position:fixed; inset:0; z-index:100; padding:clamp(14px,4vw,48px); background:#020713cc; overflow:auto; }
+    .history-dialog { max-width:1120px; margin:auto; padding:22px; border:1px solid #344661; border-radius:14px; background:#0b1728; box-shadow:0 20px 80px #000a; } #station-history-modal .history-dialog { max-width:min(1720px,100%); }
     .history-head { display:flex; gap:12px; justify-content:space-between; align-items:center; margin-bottom:18px; }
     .history-head h2 { margin:0; } .history-controls { display:flex; gap:10px; align-items:center; }
     .history-controls input,.history-close { border:1px solid #496584; border-radius:7px; background:#12243c; color:#ecf4ff; padding:8px 10px; }
@@ -68,12 +97,26 @@
     .history-panel h3 { margin:0 0 8px; font-size:15px; } .history-empty { color:#93a7c2; padding:54px 0; text-align:center; }
     .history-svg { width:100%; height:170px; display:block; overflow:visible; } .history-axis { color:#93a7c2; font-size:10px; }
     .history-events { max-height:170px; overflow:auto; } .history-event { display:flex; justify-content:space-between; border-bottom:1px solid #29405c; padding:8px 0; }
+    .edge-config-actions { display:flex; align-items:end; gap:10px; flex-wrap:wrap; margin:14px 0; } .edge-config-actions label,.edge-config-grid label { display:grid; gap:5px; color:#b8cce3; font-size:.78rem; } .edge-config-actions input,.edge-config-grid input,.edge-config-grid select { min-width:0; width:100%; border:1px solid #496584; border-radius:7px; background:#12243c; color:#ecf4ff; padding:8px 10px; } .edge-config-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; } .edge-config-section { margin-top:18px; padding-top:16px; border-top:1px solid #29405c; } .edge-config-section-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; } .edge-config-section h3 { margin:0; } .edge-config-card { margin:10px 0; padding:13px; background:#0d1c30; border:1px solid #29405c; border-radius:10px; } .edge-config-card-head { display:flex; justify-content:space-between; gap:8px; align-items:center; margin-bottom:10px; } .edge-config-card h4 { margin:0; } .edge-config-checkbox { display:flex !important; align-items:center; gap:7px; margin-top:4px; } .edge-config-checkbox input { width:auto; } .edge-node-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:12px; } .edge-node-grid label { font-size:.71rem; } .edge-action { border:1px solid #496584; border-radius:7px; background:#12243c; color:#ecf4ff; padding:8px 10px; cursor:pointer; font-weight:700; } .edge-action.danger { border-color:#9d5151; color:#ffaaa5; } #edge-config-result { color:#a9d8bd; font-size:.84rem; } @media(max-width:720px) { .edge-config-grid,.edge-node-grid { grid-template-columns:1fr; } }
     @media(max-width:720px) { .history-grid { grid-template-columns:1fr; } .history-controls { flex-wrap:wrap; justify-content:flex-end; } }
   </style>
   <div id="station-history-modal" hidden aria-hidden="true">
     <section class="history-dialog" role="dialog" aria-modal="true" aria-labelledby="station-history-title">
       <div class="history-head"><div><div class="eyebrow">Daily history</div><h2 id="station-history-title">Station</h2></div><div class="history-controls"><input id="station-history-date" type="date"><button class="history-close" type="button">Close</button></div></div>
       <div id="station-history-content" class="history-grid"><div class="history-empty">Loading history…</div></div>
+    </section>
+  </div>
+  <div id="edge-config-modal" hidden aria-hidden="true">
+    <section class="history-dialog" role="dialog" aria-modal="true" aria-labelledby="edge-config-title">
+      <div class="history-head"><div><div class="eyebrow">Edge administration</div><h2 id="edge-config-title">Configuration</h2></div><button id="edge-config-close" class="history-close" type="button">Close</button></div>
+      <p class="muted">Configure the line, OPC UA endpoints, stations and NodeIds. Secret values remain Windows environment variables; only their variable names are stored.</p>
+      <div class="edge-config-actions"><label>Administrator token<input id="edge-admin-token" type="password" autocomplete="off" placeholder="Only required when configured"></label><button id="edge-config-load" class="history-close" type="button">Load configuration</button><strong id="edge-config-result" aria-live="polite"></strong></div>
+      <form id="edge-config-form" hidden>
+        <section class="edge-config-section"><h3>Line</h3><div class="edge-config-grid"><label>Line ID<input data-field="line_id" required></label><label>Line name<input data-field="line_name" required></label><label>Timezone<input data-field="timezone" required></label></div></section>
+        <section class="edge-config-section"><div class="edge-config-section-head"><h3>OPC UA endpoints</h3><button id="edge-add-endpoint" class="edge-action" type="button">Add endpoint</button></div><div id="edge-endpoints"></div></section>
+        <section class="edge-config-section"><div class="edge-config-section-head"><h3>Stations</h3><button id="edge-add-station" class="edge-action" type="button">Add station</button></div><div id="edge-stations"></div></section>
+        <div class="edge-config-actions"><button id="edge-config-save" class="edge-action" type="submit">Save configuration</button></div>
+      </form>
     </section>
   </div>
   <script>
@@ -105,6 +148,27 @@
         return `<section class="history-panel"><h3>Station states</h3><div class="history-events">${rows.map(row => `<div class="history-event"><span>${time(row.observed_at)}</span><strong>${esc(row.state)}</strong></div>`).join('')}</div></section>`;
       }
 
+      const duration = seconds => {
+        const value = Math.max(0, Math.round(Number(seconds) || 0));
+        return `${String(Math.floor(value / 3600)).padStart(2,'0')}:${String(Math.floor(value / 60) % 60).padStart(2,'0')}:${String(value % 60).padStart(2,'0')}`;
+      };
+
+      function stoppageHistory(history) {
+        const rows = history.states || [];
+        const dayStart = new Date(history.day_start || `${history.date}T00:00:00`).getTime();
+        const dayEnd = Math.min(new Date(history.day_end || Date.now()).getTime(), Date.now());
+        const stops = [];
+        rows.forEach((row, index) => {
+          if (!['IDLE', 'STOPPED', 'FAULT'].includes(row.state)) return;
+          const started = Math.max(new Date(row.observed_at).getTime(), dayStart);
+          const next = index + 1 < rows.length ? new Date(rows[index + 1].observed_at).getTime() : dayEnd;
+          if (next > started) stops.push({state:row.state, detail:row.detail || (row.state === 'FAULT' ? 'Fault active' : 'Automatic stop'), started, ended:next});
+        });
+        const total = stops.reduce((sum, stop) => sum + stop.ended - stop.started, 0) / 1000;
+        const events = stops.length ? stops.map(stop => `<div class="history-event"><span>${time(new Date(stop.started).toISOString())} · ${duration((stop.ended-stop.started)/1000)}</span><strong>${esc(stop.state === 'FAULT' ? `FAULT · ${stop.detail}` : 'STOP')}</strong></div>`).join('') : '<div class="history-empty">No automatic stops or active faults recorded for this day.</div>';
+        return `<section class="history-panel"><h3>Stops and faults</h3><div class="history-event"><span>Total downtime</span><strong>${duration(total)}</strong></div><div class="history-event"><span>Stop events</span><strong>${stops.length}</strong></div><div class="history-events">${events}</div></section>`;
+      }
+
       async function loadHistory() {
         if (!selectedStation) return;
         content.innerHTML = '<div class="history-empty">Loading history…</div>';
@@ -114,8 +178,9 @@
           const history = await response.json();
           content.innerHTML = [
             chart('Cycle duration', history.cycles, 'cycle_seconds', 's', selectedStation.target_cycle_seconds),
-            chart('Parts counter', history.counters, 'parts'),
+            chart('NOK counter', history.counters, 'parts'),
             stateHistory(history.states),
+            stoppageHistory(history),
             `<section class="history-panel"><h3>Daily summary</h3><div class="history-event"><span>Recorded cycles</span><strong>${history.cycles.length}</strong></div><div class="history-event"><span>Counter samples</span><strong>${history.counters.length}</strong></div><div class="history-event"><span>State changes</span><strong>${history.states.length}</strong></div></section>`
           ].join('');
         } catch (error) {
@@ -154,6 +219,144 @@
       }
       new MutationObserver(makeCardsInteractive).observe(document.body, {childList:true, subtree:true});
       setInterval(makeCardsInteractive, 1500); makeCardsInteractive();
+    })();
+  </script>
+  <script>
+    (() => {
+      const modal = document.querySelector('#edge-config-modal');
+      const open = document.querySelector('#edge-settings');
+      const close = document.querySelector('#edge-config-close');
+      const load = document.querySelector('#edge-config-load');
+      const token = document.querySelector('#edge-admin-token');
+      const form = document.querySelector('#edge-config-form');
+      const endpoints = document.querySelector('#edge-endpoints');
+      const stations = document.querySelector('#edge-stations');
+      const result = document.querySelector('#edge-config-result');
+      const metricNames = ['Running','CycleActive','CycleComplete','CycleTime','PartsCounter','FaultActive','AutoMode','AlarmCode','Heartbeat'];
+      let configuration = null;
+
+      const headers = () => token.value ? {'X-Edge-Admin-Token': token.value} : {};
+      const message = (text, error = false) => { result.textContent = text; result.style.color = error ? '#ff9696' : '#a9d8bd'; };
+      const show = () => { modal.hidden = false; modal.setAttribute('aria-hidden', 'false'); message(''); };
+      const hide = () => { modal.hidden = true; modal.setAttribute('aria-hidden', 'true'); };
+      const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+      const textField = (field, label, value, type = 'text') => `<label>${label}<input type="${type}" data-field="${field}" value="${esc(value)}"></label>`;
+      const endpointOptions = value => configuration.endpoints.map(endpoint => `<option value="${esc(endpoint.endpoint_id)}" ${endpoint.endpoint_id === value ? 'selected' : ''}>${esc(endpoint.endpoint_id)}</option>`).join('');
+
+      function render() {
+        if (!configuration) return;
+        form.querySelector('[data-field="line_id"]').value = configuration.line_id;
+        form.querySelector('[data-field="line_name"]').value = configuration.line_name;
+        form.querySelector('[data-field="timezone"]').value = configuration.timezone;
+        endpoints.innerHTML = configuration.endpoints.map((endpoint, index) => `<article class="edge-config-card" data-index="${index}"><div class="edge-config-card-head"><h4>Endpoint ${index + 1}</h4><button class="edge-action danger" type="button" data-remove-endpoint="${index}" ${configuration.endpoints.length === 1 ? 'disabled' : ''}>Remove</button></div><div class="edge-config-grid">${textField('endpoint_id','Identifier',endpoint.endpoint_id)}${textField('url','OPC UA URL',endpoint.url)}${textField('application_uri','Application URI',endpoint.application_uri || '')}${textField('subscription_interval_ms','Polling (ms)',endpoint.subscription_interval_ms,'number')}${textField('username','Username',endpoint.username || '')}${textField('password_secret_ref','Password variable',endpoint.password_secret_ref || '')}${textField('connect_timeout_seconds','Timeout (s)',endpoint.connect_timeout_seconds || 15,'number')}</div><div class="edge-config-grid" style="margin-top:10px"><label>Security policy<select data-field="security.policy">${['None','Basic256Sha256','Aes128Sha256RsaOaep','Aes256Sha256RsaPss'].map(option => `<option ${option === endpoint.security.policy ? 'selected' : ''}>${option}</option>`).join('')}</select></label><label>Security mode<select data-field="security.mode">${['None','Sign','SignAndEncrypt'].map(option => `<option ${option === endpoint.security.mode ? 'selected' : ''}>${option}</option>`).join('')}</select></label>${textField('security.client_certificate_path','Client certificate',endpoint.security.client_certificate_path || '')}${textField('security.private_key_path','Private key',endpoint.security.private_key_path || '')}${textField('security.server_certificate_path','PLC certificate',endpoint.security.server_certificate_path || '')}</div></article>`).join('');
+        stations.innerHTML = configuration.stations.map((station, index) => `<article class="edge-config-card" data-index="${index}"><div class="edge-config-card-head"><h4>Station ${index + 1}</h4><button class="edge-action danger" type="button" data-remove-station="${index}" ${configuration.stations.length === 1 ? 'disabled' : ''}>Remove</button></div><div class="edge-config-grid">${textField('station_id','Identifier',station.station_id)}${textField('name','Display name',station.name)}<label>Endpoint<select data-field="endpoint_id">${endpointOptions(station.endpoint_id)}</select></label>${textField('target_cycle_seconds','Cycle target (s)',station.target_cycle_seconds,'number')}${textField('stale_after_seconds','Signal stale after (s)',station.stale_after_seconds,'number')}<label class="edge-config-checkbox">Line output station<input type="checkbox" data-field="is_output_station" ${station.is_output_station ? 'checked' : ''}></label></div><div class="edge-node-grid">${metricNames.map(metric => textField(`node-${metric}`,metric,station.node_map[metric] || '')).join('')}</div></article>`).join('');
+      }
+
+      function collect() {
+        const field = name => form.querySelector(`[data-field="${name}"]`).value.trim();
+        const next = {...configuration, line_id:field('line_id'), line_name:field('line_name'), timezone:field('timezone')};
+        next.endpoints = [...endpoints.querySelectorAll('[data-index]')].map(card => ({endpoint_id:card.querySelector('[data-field="endpoint_id"]').value.trim(), url:card.querySelector('[data-field="url"]').value.trim(), application_uri:card.querySelector('[data-field="application_uri"]').value.trim() || null, subscription_interval_ms:Number(card.querySelector('[data-field="subscription_interval_ms"]').value), username:card.querySelector('[data-field="username"]').value.trim() || null, password_secret_ref:card.querySelector('[data-field="password_secret_ref"]').value.trim() || null, connect_timeout_seconds:Number(card.querySelector('[data-field="connect_timeout_seconds"]').value), security:{policy:card.querySelector('[data-field="security.policy"]').value, mode:card.querySelector('[data-field="security.mode"]').value, client_certificate_path:card.querySelector('[data-field="security.client_certificate_path"]').value.trim() || null, private_key_path:card.querySelector('[data-field="security.private_key_path"]').value.trim() || null, server_certificate_path:card.querySelector('[data-field="security.server_certificate_path"]').value.trim() || null}}));
+        next.stations = [...stations.querySelectorAll('[data-index]')].map(card => { const node_map = {}; metricNames.forEach(metric => { const value = card.querySelector(`[data-field="node-${metric}"]`).value.trim(); if (value) node_map[metric] = value; }); return {station_id:card.querySelector('[data-field="station_id"]').value.trim(), name:card.querySelector('[data-field="name"]').value.trim(), endpoint_id:card.querySelector('[data-field="endpoint_id"]').value, target_cycle_seconds:Number(card.querySelector('[data-field="target_cycle_seconds"]').value), stale_after_seconds:Number(card.querySelector('[data-field="stale_after_seconds"]').value), is_output_station:card.querySelector('[data-field="is_output_station"]').checked, node_map}; });
+        next.endpoints.forEach(endpoint => delete endpoint.password_configured); delete next.admin.token_configured;
+        return next;
+      }
+
+      async function loadConfig() {
+        load.disabled = true; const previousLabel = load.textContent; load.textContent = 'Loading…'; message('Loading configuration…');
+        try {
+          const response = await fetch('/edge/api/admin/config', {headers:headers(), cache:'no-store'});
+          const raw = await response.text(); let payload;
+          try { payload = JSON.parse(raw); } catch (_) { throw new Error(`The administration service returned ${response.status}: ${raw || 'empty response'}`); }
+          if (!response.ok) throw new Error(payload.detail || 'Could not load configuration');
+          configuration = payload; form.hidden = false; render();
+          message('Configuration loaded.');
+        } catch (error) { message(error.message || 'Could not load configuration.', true); }
+        finally { load.disabled = false; load.textContent = previousLabel; }
+      }
+
+      async function saveConfig() {
+        if (!configuration) return;
+        const payload = collect();
+        message('Validating and saving…');
+        try {
+          const response = await fetch('/edge/api/admin/config', {method:'PUT', headers:{'Content-Type':'application/json', ...headers()}, body:JSON.stringify(payload)});
+          const raw = await response.text(); let responsePayload;
+          try { responsePayload = JSON.parse(raw); } catch (_) { throw new Error(`The administration service returned ${response.status}: ${raw || 'empty response'}`); }
+          if (!response.ok) {
+            const detail = Array.isArray(responsePayload.detail) ? responsePayload.detail.map(item => item.msg).join('; ') : responsePayload.detail;
+            throw new Error(detail || 'Could not save configuration');
+          }
+          message('Saved. Restart the RupMES Edge Dashboard task to apply the connection changes.');
+        } catch (error) { message(error.message, true); }
+      }
+
+      open.addEventListener('click', show);
+      close.addEventListener('click', hide);
+      modal.addEventListener('click', event => { if (event.target === modal) hide(); });
+      load.addEventListener('click', loadConfig);
+      form.addEventListener('submit', event => { event.preventDefault(); saveConfig(); });
+      document.querySelector('#edge-add-endpoint').addEventListener('click', () => { configuration = collect(); configuration.endpoints.push({endpoint_id:`opc-${configuration.endpoints.length + 1}`,url:'opc.tcp://PLC-HOSTNAME-OR-IP:4840',application_uri:null,subscription_interval_ms:500,username:null,password_secret_ref:null,connect_timeout_seconds:15,security:{policy:'Basic256Sha256',mode:'SignAndEncrypt',client_certificate_path:null,private_key_path:null,server_certificate_path:null}}); render(); });
+      document.querySelector('#edge-add-station').addEventListener('click', () => { configuration = collect(); configuration.stations.push({station_id:`ST${String(configuration.stations.length + 1).padStart(2,'0')}`,name:'New station',endpoint_id:configuration.endpoints[0].endpoint_id,target_cycle_seconds:18,stale_after_seconds:5,is_output_station:false,node_map:{}}); render(); });
+      endpoints.addEventListener('click', event => { const index = event.target.dataset.removeEndpoint; if (index == null) return; configuration = collect(); configuration.endpoints.splice(Number(index),1); configuration.stations.forEach(station => { if (!configuration.endpoints.some(endpoint => endpoint.endpoint_id === station.endpoint_id)) station.endpoint_id = configuration.endpoints[0].endpoint_id; }); render(); });
+      stations.addEventListener('click', event => { const index = event.target.dataset.removeStation; if (index == null) return; configuration = collect(); configuration.stations.splice(Number(index),1); render(); });
+    })();
+  </script>
+  <script>
+    (() => {
+      // The configuration editor is intentionally kept backwards-compatible. This
+      // small extension adds the optional line-cycle block to its JSON payload.
+      let lastConfig = null;
+      const safe = value => String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+      const originalFetch = window.fetch.bind(window);
+      window.fetch = async (input, init = {}) => {
+        const url = typeof input === 'string' ? input : input?.url || '';
+        const method = (init.method || 'GET').toUpperCase();
+        if (url.includes('/edge/api/admin/config') && method !== 'GET' && init.body) {
+          try {
+            const payload = JSON.parse(init.body);
+            const enabled = document.querySelector('#line-cycle-enabled')?.checked;
+            if (enabled) {
+              payload.line_cycle = {
+                endpoint_id: document.querySelector('#line-cycle-endpoint')?.value?.trim(),
+                cycle_time_node: document.querySelector('#line-cycle-time-node')?.value?.trim(),
+                cycle_complete_node: document.querySelector('#line-cycle-complete-node')?.value?.trim(),
+                target_cycle_seconds: Number(document.querySelector('#line-cycle-target')?.value),
+              };
+            } else {
+              delete payload.line_cycle;
+            }
+            init = {...init, body: JSON.stringify(payload)};
+          } catch (_) { /* Existing save validation remains responsible for errors. */ }
+        }
+        const response = await originalFetch(input, init);
+        if (url.includes('/edge/api/admin/config') && method === 'GET' && response.ok) {
+          response.clone().json().then(config => { lastConfig = config; setTimeout(injectLineCycleFields, 0); }).catch(() => {});
+        }
+        return response;
+      };
+
+      function injectLineCycleFields() {
+        if (!lastConfig || document.querySelector('#line-cycle-config')) return;
+        const saveButton = [...document.querySelectorAll('button')].find(button => /save configuration/i.test(button.textContent || ''));
+        if (!saveButton) return;
+        const current = lastConfig.line_cycle || {};
+        const options = (lastConfig.endpoints || []).map(endpoint => `<option value="${safe(endpoint.endpoint_id)}" ${endpoint.endpoint_id === current.endpoint_id ? 'selected' : ''}>${safe(endpoint.endpoint_id)}</option>`).join('');
+        const section = document.createElement('section');
+        section.id = 'line-cycle-config';
+        section.style.cssText = 'border-top:1px solid var(--line);margin-top:22px;padding-top:18px;display:grid;gap:10px';
+        section.innerHTML = `
+          <h2 style="margin:0">Full-piece line cycle</h2>
+          <label><input id="line-cycle-enabled" type="checkbox" ${current.endpoint_id ? 'checked' : ''}> Enable line-level cycle tracking</label>
+          <div class="config-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+            <label>Endpoint<select id="line-cycle-endpoint">${options}</select></label>
+            <label>Target (s)<input id="line-cycle-target" type="number" min="0.1" step="0.1" value="${current.target_cycle_seconds ?? ''}"></label>
+            <label>Full-cycle time NodeId<input id="line-cycle-time-node" value="${safe(current.cycle_time_node || '')}" placeholder="ns=4;s=OPC_UA.STxx.CycleTime_Total"></label>
+            <label>Cycle-complete NodeId<input id="line-cycle-complete-node" value="${safe(current.cycle_complete_node || '')}" placeholder="ns=4;s=OPC_UA.STxx.CycleComplete"></label>
+          </div>
+          <p class="muted" style="margin:0">Select the PLC-confirmed full-piece signals. A cycle is recorded only when CycleComplete changes to true.</p>`;
+        saveButton.parentElement?.before(section);
+      }
+      new MutationObserver(injectLineCycleFields).observe(document.body, {childList:true, subtree:true});
     })();
   </script>
 </body>

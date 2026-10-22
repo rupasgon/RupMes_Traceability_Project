@@ -13,7 +13,7 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 
 $payloadRoot = Join-Path $PSScriptRoot "payload\src\rupmes_edge"
 $targetRoot = Join-Path $InstallRoot "src\rupmes_edge"
-$files = @("app.py", "runtime.py", "store.py", "static\index.html")
+$files = @("__main__.py", "app.py", "config.py", "runtime.py", "store.py", "static\index.html")
 
 if (-not (Test-Path -LiteralPath $targetRoot)) {
     throw "RupMES Edge was not found in: $InstallRoot"
@@ -28,6 +28,20 @@ foreach ($relativeFile in $files) {
 
     New-Item -ItemType Directory -Path (Split-Path -Parent $destination) -Force | Out-Null
     Copy-Item -LiteralPath $source -Destination $destination -Force
+}
+
+$configPath = Join-Path $env:ProgramData "RupMES Edge\config.json"
+if (Test-Path -LiteralPath $configPath) {
+    $tokenReference = (Get-Content -Raw -LiteralPath $configPath | ConvertFrom-Json).admin.token_secret_ref
+    if ($tokenReference -and -not [Environment]::GetEnvironmentVariable($tokenReference, "Machine")) {
+        $tokenBytes = New-Object byte[] 32
+        $random = [Security.Cryptography.RandomNumberGenerator]::Create()
+        $random.GetBytes($tokenBytes)
+        $random.Dispose()
+        $adminToken = [Convert]::ToBase64String($tokenBytes).TrimEnd('=').Replace('+', '-').Replace('/', '_')
+        [Environment]::SetEnvironmentVariable($tokenReference, $adminToken, "Machine")
+        Write-Host "Initial Edge administrator token (save it now): $adminToken" -ForegroundColor Yellow
+    }
 }
 
 Stop-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue

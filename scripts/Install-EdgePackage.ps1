@@ -3,7 +3,8 @@ param(
     [string]$InstallRoot = (Join-Path $env:ProgramFiles "RupMES Edge"),
     [string]$DataRoot = (Join-Path $env:ProgramData "RupMES Edge"),
     [string]$TaskName = "RupMES Edge Dashboard",
-    [string]$PythonExe = "python"
+    [string]$PythonExe = "python",
+    [string]$AdminToken
 )
 
 $ErrorActionPreference = "Stop"
@@ -57,6 +58,23 @@ if (-not (Test-Path -LiteralPath $configPath)) {
     Write-Host "Configuration template created: $configPath" -ForegroundColor Yellow
 } else {
     Write-Host "Existing configuration preserved: $configPath" -ForegroundColor Green
+}
+
+$tokenReference = (Get-Content -Raw -LiteralPath $configPath | ConvertFrom-Json).admin.token_secret_ref
+if ($tokenReference) {
+    $existingToken = [Environment]::GetEnvironmentVariable($tokenReference, "Machine")
+    if (-not $existingToken) {
+        if (-not $AdminToken) {
+            $tokenBytes = New-Object byte[] 32
+            $random = [Security.Cryptography.RandomNumberGenerator]::Create()
+            $random.GetBytes($tokenBytes)
+            $random.Dispose()
+            $AdminToken = [Convert]::ToBase64String($tokenBytes).TrimEnd('=').Replace('+', '-').Replace('/', '_')
+        }
+        [Environment]::SetEnvironmentVariable($tokenReference, $AdminToken, "Machine")
+        Write-Host "`nInitial Edge administrator token (save it now): $AdminToken" -ForegroundColor Yellow
+        Write-Host "It is stored as the machine variable $tokenReference and is needed in the Configuration window."
+    }
 }
 
 $serviceInstaller = Join-Path $InstallRoot "scripts\Install-EdgeWindowsService.ps1"

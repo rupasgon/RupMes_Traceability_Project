@@ -8,6 +8,7 @@ from typing import Any
 
 class StationState(StrEnum):
     RUNNING = "RUNNING"
+    STANDBY = "STANDBY"
     IDLE = "IDLE"
     STOPPED = "STOPPED"
     FAULT = "FAULT"
@@ -37,6 +38,7 @@ class LiveStation:
     cycles_over_target: int = 0
     _cycle_total_seconds: float = 0.0
     _last_cycle_complete: bool = False
+    _last_cycle_complete_at: datetime | None = None
 
     def apply(self, metric: str, value: Any, observed_at: datetime) -> None:
         self.signals[metric] = value
@@ -47,6 +49,7 @@ class LiveStation:
         if metric == "CycleComplete":
             is_complete = bool(value)
             if is_complete and not self._last_cycle_complete:
+                self._last_cycle_complete_at = observed_at
                 self._record_cycle()
             self._last_cycle_complete = is_complete
 
@@ -70,8 +73,16 @@ class LiveStation:
             return StationState.FAULT
         if self.signals.get("AutoMode") is False:
             return StationState.MANUAL
-        if self.signals.get("Running") is True or self.signals.get("CycleActive") is True:
+        # PLC Running often means enabled/ready.  It is not sufficient proof
+        # of production: a station is green only during an active cycle or
+        # shortly after a completed cycle.
+        if self.signals.get("CycleActive") is True:
             return StationState.RUNNING
+        recent_cycle_window = max(self.definition.target_cycle_seconds * 1.5, 5.0)
+        if self._last_cycle_complete_at and (now - self._last_cycle_complete_at).total_seconds() <= recent_cycle_window:
+            return StationState.RUNNING
+        if self.signals.get("Running") is True:
+            return StationState.STANDBY
         if self.signals.get("Running") is False:
             return StationState.IDLE
         return StationState.UNKNOWN
@@ -86,6 +97,7 @@ class LiveStation:
             "state": state.value,
             "target_cycle_seconds": self.definition.target_cycle_seconds,
             "last_cycle_seconds": self.last_cycle_seconds,
+            "current_cycle_seconds": self.signals.get("CycleTime"),
             "average_cycle_seconds": average,
             "cycle_deviation_seconds": (
                 self.last_cycle_seconds - self.definition.target_cycle_seconds

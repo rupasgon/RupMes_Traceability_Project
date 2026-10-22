@@ -20,7 +20,7 @@ if (Test-Path -LiteralPath $stageRoot) {
 New-Item -ItemType Directory -Path (Join-Path $payloadRoot "static") -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot "Install-EdgeHistoryUpdate.ps1") -Destination $stageRoot -Force
 
-foreach ($relativeFile in @("app.py", "runtime.py", "store.py", "static\index.html")) {
+foreach ($relativeFile in @("__main__.py", "app.py", "config.py", "runtime.py", "store.py", "static\index.html")) {
     $source = Join-Path $projectRoot "src\rupmes_edge\$relativeFile"
     $destination = Join-Path $payloadRoot $relativeFile
     Copy-Item -LiteralPath $source -Destination $destination -Force
