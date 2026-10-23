@@ -33,6 +33,7 @@
       const escape = value => String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
       let activeView = 'alerts';
       const requiresAttention = station => ['FAULT', 'MANUAL'].includes(station.state);
+      const incidentStartedAt = new Map();
       const elapsed = value => {
         const started = value ? new Date(value).getTime() : NaN;
         const seconds = Number.isFinite(started) ? Math.max(0, Math.floor((Date.now() - started) / 1000)) : 0;
@@ -47,7 +48,7 @@
         const incidentLabel = station.state === 'MANUAL' ? 'MODO MANUAL ACTIVO' : 'AVERÍA ACTIVA';
         const incidentDetail = station.alarm_code ? ` · ${escape(station.alarm_code)}` : '';
         if (activeView === 'alerts') {
-          return `<article class="station alert incident-card ${escape(station.state)}"><div class="station-head"><div><h2>${escape(station.name)}</h2><div class="station-code">Máquina / estación · ${escape(station.id)}</div></div><span class="pill">${escape(station.state)}</span></div><div class="incident-status">${incidentLabel}</div>${station.state === 'FAULT' && station.alarm_code ? `<div class="fault-note">FALLO PLC · ${escape(station.alarm_code)}</div>` : ''}<div class="incident-timer">${elapsed(station.state_since || station.last_update)}</div><div class="incident-meta">Tiempo transcurrido desde la activación</div></article>`;
+          return `<article class="station alert incident-card ${escape(station.state)}"><div class="station-head"><div><h2>${escape(station.name)}</h2><div class="station-code">Máquina / estación · ${escape(station.id)}</div></div><span class="pill">${escape(station.state)}</span></div><div class="incident-status">${incidentLabel}</div>${station.state === 'FAULT' && station.alarm_code ? `<div class="fault-note">FALLO PLC · ${escape(station.alarm_code)}</div>` : ''}<div class="incident-timer">${elapsed(station.incident_since || station.state_since || station.last_update)}</div><div class="incident-meta">Tiempo transcurrido desde la activación</div></article>`;
         }
         return `<article class="station ${escape(station.state)} ${requiresAttention(station) ? 'alert' : ''}"><div class="station-head"><div><h2>${escape(station.name)}</h2><div class="station-code">${escape(station.id)}</div>${station.is_output_station ? '<div class="output">LINE OUTPUT STATION</div>' : ''}</div><span class="pill">${escape(station.state)}</span></div><div class="station-grid"><div><div class="label">PLC cycle time</div><div class="value">${number(displayedCycle)} s</div></div><div><div class="label">Target</div><div class="value">${number(station.target_cycle_seconds)} s</div></div><div><div class="label">Deviation</div><div class="value ${deviation > 0 ? 'negative' : ''}">${deviation == null ? '--' : `${deviation > 0 ? '+' : ''}${number(deviation)} s`}</div></div><div><div class="label">NOK counter</div><div class="value">${station.parts_counter ?? '--'}</div></div><div><div class="label">Average cycle</div><div class="value">${number(station.average_cycle_seconds)} s</div></div><div><div class="label">Cycles over target</div><div class="value">${station.cycles_over_target}</div></div></div>${requiresAttention(station) ? `<div class="fault-note">${incidentLabel}${incidentDetail}</div>` : ''}<div class="station-footer"><span>${mode}</span><span>Updated ${time(station.last_update)}</span></div></article>`;
       };
@@ -104,6 +105,21 @@
           document.querySelector('#cycles').textContent = data.completed_cycles; document.querySelector('#cycles-detail').textContent = `${data.cycles_over_target} over target`;
           document.querySelector('#bottleneck').textContent = data.bottleneck ? data.bottleneck.name : '--'; document.querySelector('#bottleneck-detail').textContent = data.bottleneck ? `${number(data.bottleneck.average_cycle_seconds)} s average / ${number(data.bottleneck.target_cycle_seconds)} s target` : 'Waiting for cycles';
           document.querySelector('#updated').textContent = time(data.generated_at);
+          data.stations.forEach((station) => {
+            const previous = incidentStartedAt.get(station.id);
+            if (!requiresAttention(station)) {
+              incidentStartedAt.delete(station.id);
+              return;
+            }
+            const backendSince = Date.parse(station.state_since || "");
+            const startedAt = Number.isFinite(backendSince)
+              ? backendSince
+              : previous?.state === station.state
+                ? previous.startedAt
+                : Date.now();
+            incidentStartedAt.set(station.id, { state: station.state, startedAt });
+            station.incident_since = new Date(startedAt).toISOString();
+          });
           const visibleStations = activeView === 'alerts' ? data.stations.filter(requiresAttention) : data.stations;
           document.querySelector('#stations').innerHTML = visibleStations.length ? visibleStations.map(stationCard).join('') : '<section class="alerts-empty"><div><strong>Sin incidencias activas</strong><span>Todas las estaciones están en modo automático y sin averías.</span></div></section>';
           const attention = data.stations.filter(s => ['FAULT','STOPPED','DISCONNECTED','MANUAL'].includes(s.state)); document.querySelector('#issues').innerHTML = attention.length ? attention.map(s => `<div class="issue"><strong>${escape(s.name)} · ${escape(s.state)}</strong><span>${s.alarm_code ? `Alarm ${escape(s.alarm_code)}` : `Last signal ${time(s.last_update)}`}</span></div>`).join('') : '<p class="empty">No stations require attention.</p>';
