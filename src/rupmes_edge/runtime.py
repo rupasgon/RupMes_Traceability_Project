@@ -16,6 +16,7 @@ class EdgeRuntime:
         self.endpoint_health: dict[str, tuple[bool, str | None]] = {}
         self.store = store
         self._last_states: dict[str, str] = {}
+        self._state_since: dict[str, datetime] = {}
         self.line_cycle_config = line_cycle_config
         self._line_cycle_signals: dict[str, Any] = {}
         self._line_cycle_last_complete = False
@@ -124,6 +125,8 @@ class EdgeRuntime:
                 if self.store and self._last_states.get(station_id) != state:
                     detail = str(item["alarm_code"]) if state == "FAULT" and item["alarm_code"] not in (None, "", 0, "0") else ("Fault active" if state == "FAULT" else None)
                     self.store.record_state(station_id, state, observed_at, detail)
+                if self._last_states.get(station_id) != state:
+                    self._state_since[station_id] = observed_at
                 self._last_states[station_id] = state
 
     def set_endpoint_health(self, endpoint_id: str, connected: bool, error: str | None = None) -> None:
@@ -139,7 +142,10 @@ class EdgeRuntime:
             stations = []
             for station in self.stations.values():
                 connected = self.endpoint_health.get(station.definition.endpoint_id, (False, None))[0]
-                stations.append(station.as_dict(connected, now))
+                item = station.as_dict(connected, now)
+                state_since = self._state_since.get(station.definition.station_id)
+                item["state_since"] = state_since.isoformat() if state_since else item["last_update"]
+                stations.append(item)
             health = {endpoint_id: {"connected": value[0], "error": value[1]} for endpoint_id, value in self.endpoint_health.items()}
             line_counters = [
                 {key: value for key, value in counter.items() if not key.startswith("_")}
