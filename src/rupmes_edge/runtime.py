@@ -6,10 +6,14 @@ import threading
 from typing import Any
 
 from rupmes_edge.domain import LiveStation, StationDefinition, utc_now
+from rupmes_edge.stoppages import StoppagePolicy, StoppageTracker
 
 
 class EdgeRuntime:
-    def __init__(self, line_name: str, stations: list[StationDefinition], store=None, line_cycle_config=None):
+    def __init__(
+        self, line_name: str, stations: list[StationDefinition], store=None, line_cycle_config=None,
+        *, line_id: str | None = None, timezone_name: str = "Europe/Madrid", stoppage_policy: StoppagePolicy | None = None,
+    ):
         self.line_name = line_name
         self._lock = RLock()
         self.stations = {definition.station_id: LiveStation(definition) for definition in stations}
@@ -26,6 +30,17 @@ class EdgeRuntime:
         self._line_cycle_total_seconds = 0.0
         self._last_counters: dict[str, float] = {}
         self.line_counters: dict[str, dict[str, Any]] = {}
+        self._stoppage_trackers: dict[str, StoppageTracker] = {}
+        if self.store:
+            policy = stoppage_policy or StoppagePolicy()
+            self._stoppage_trackers = {
+                definition.station_id: StoppageTracker(definition.station_id, self.store, line_id or line_name, timezone_name, policy)
+                for definition in stations
+            }
+            for event in self.store.load_open_stoppages():
+                tracker = self._stoppage_trackers.get(event["station_id"])
+                if tracker:
+                    tracker.restore(event)
 
     async def apply_line_cycle_update(self, metric: str, value: Any, observed_at: datetime) -> None:
         """Record an optional, PLC-defined full-piece cycle on a rising completion edge."""
@@ -53,8 +68,24 @@ class EdgeRuntime:
             return
         with self._lock:
             station = self.stations[station_id]
+            previous_value = station.signals.get(metric)
+            changed = metric not in station.signals or previous_value != value
             previous_cycles = station.completed_cycles
             station.apply(metric, value, observed_at)
+            if self.store and changed:
+                self.store.record_signal(station_id, metric, previous_value, value, observed_at)
+                if metric.startswith("Alarm:"):
+                    alarm_id = metric.removeprefix("Alarm:")
+                    definition = next((alarm for alarm in station.definition.alarms if alarm.alarm_id == alarm_id), None)
+                    if definition:
+                        self.store.record_fault(
+                            station_id,
+                            alarm_id,
+                            definition.category,
+                            definition.description,
+                            bool(value),
+                            observed_at,
+                        )
             if self.store and station.completed_cycles > previous_cycles and station.last_cycle_seconds is not None:
                 self.store.record_cycle(station_id, station.last_cycle_seconds, observed_at)
             if self.store and metric == "PartsCounter":
@@ -125,6 +156,9 @@ class EdgeRuntime:
                 if self.store and self._last_states.get(station_id) != state:
                     detail = str(item["alarm_code"]) if state == "FAULT" and item["alarm_code"] not in (None, "", 0, "0") else ("Fault active" if state == "FAULT" else None)
                     self.store.record_state(station_id, state, observed_at, detail)
+                tracker = self._stoppage_trackers.get(station_id)
+                if tracker:
+                    tracker.observe(state, item, observed_at)
                 if self._last_states.get(station_id) != state:
                     self._state_since[station_id] = observed_at
                 self._last_states[station_id] = state
@@ -135,6 +169,14 @@ class EdgeRuntime:
             self.endpoint_health[endpoint_id] = (connected, error)
             if self.store and previous != (connected, error):
                 self.store.record_connector(endpoint_id, connected, error, utc_now())
+            self.capture_states(endpoint_id, utc_now())
+
+    def tick(self, observed_at: datetime | None = None) -> None:
+        """Evaluate stale values and pending debounce thresholds without HTTP reads."""
+        instant = observed_at or utc_now()
+        with self._lock:
+            for endpoint_id in {station.definition.endpoint_id for station in self.stations.values()}:
+                self.capture_states(endpoint_id, instant)
 
     def snapshot(self) -> dict[str, Any]:
         with self._lock:

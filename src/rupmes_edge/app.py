@@ -23,14 +23,25 @@ def create_app(bootstrap_config: EdgeConfig, config_path: str | Path | None = No
     if stored_configuration is None:
         store.save_configuration(config.model_dump_json())
     stations = config.station_definitions()
-    runtime = EdgeRuntime(config.line_name, stations, store, config.line_cycle)
+    alarm_node_map = {
+        station.station_id: [(alarm.alarm_id, alarm.node_id) for alarm in station.alarms]
+        for station in config.stations
+    }
+    runtime = EdgeRuntime(
+        config.line_name, stations, store, config.line_cycle,
+        line_id=config.line_id, timezone_name=config.timezone, stoppage_policy=config.stoppage_policy.to_domain(),
+    )
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         collectors, tasks = [], []
         for endpoint in config.endpoints:
             assigned = [station for station in stations if station.endpoint_id == endpoint.endpoint_id]
-            collector = OpcUaSubscriptionCollector(endpoint, assigned, runtime.apply_update, lambda connected, error, endpoint_id=endpoint.endpoint_id: runtime.set_endpoint_health(endpoint_id, connected, error), endpoint.subscription_interval_ms)
+            collector = OpcUaSubscriptionCollector(
+                endpoint, assigned, runtime.apply_update,
+                lambda connected, error, endpoint_id=endpoint.endpoint_id: runtime.set_endpoint_health(endpoint_id, connected, error),
+                endpoint.subscription_interval_ms, alarm_node_map=alarm_node_map, on_state_tick=runtime.tick,
+            )
             collectors.append(collector)
             tasks.append(asyncio.create_task(collector.run()))
         if config.line_cycle:
@@ -77,6 +88,30 @@ def create_app(bootstrap_config: EdgeConfig, config_path: str | Path | None = No
             raise HTTPException(status_code=404, detail="Unknown station")
         day = selected_date or datetime.now(ZoneInfo(config.timezone)).date()
         return store.daily_history(station_id, day, config.timezone)
+
+    @app.get("/edge/api/timeline")
+    def stoppage_timeline(
+        selected_date: date | None = None,
+        days: int = 7,
+        station_id: str | None = None,
+    ) -> dict:
+        if station_id and station_id not in runtime.stations:
+            raise HTTPException(status_code=404, detail="Unknown station")
+        last_day = selected_date or datetime.now(ZoneInfo(config.timezone)).date()
+        selected_ids = [station_id] if station_id else list(runtime.stations)
+        payload = store.stoppage_timeline(selected_ids, last_day, days, config.timezone)
+        payload["stations"] = [
+            {
+                "id": definition.station_id,
+                "name": definition.name,
+                "process_id": definition.process_id,
+                "description": definition.description,
+                "physical_order": definition.physical_order,
+            }
+            for definition in stations
+            if definition.station_id in selected_ids
+        ]
+        return payload
 
     @app.get("/edge/health")
     def health() -> dict:

@@ -18,13 +18,28 @@ class StationState(StrEnum):
 
 
 @dataclass(frozen=True)
+class AlarmDefinition:
+    """One independently monitored PLC alarm assigned to a station."""
+
+    alarm_id: str
+    category: str
+    description: str | None = None
+
+
+@dataclass(frozen=True)
 class StationDefinition:
     station_id: str
     name: str
     target_cycle_seconds: float
     node_map: dict[str, str]
     endpoint_id: str = "default"
+    stale_after_seconds: float = 5.0
     is_output_station: bool = False
+    process_id: str | None = None
+    description: str | None = None
+    physical_order: int | None = None
+    opcua_pending: bool = False
+    alarms: tuple[AlarmDefinition, ...] = ()
 
 
 @dataclass
@@ -69,7 +84,7 @@ class LiveStation:
         age_seconds = (now - self.last_signal_at).total_seconds()
         if age_seconds > stale_after_seconds:
             return StationState.DISCONNECTED
-        if bool(self.signals.get("FaultActive")) or self.signals.get("AlarmCode") not in (None, "", 0, "0"):
+        if bool(self.signals.get("FaultActive")) or self.signals.get("AlarmCode") not in (None, "", 0, "0") or self.active_alarms():
             return StationState.FAULT
         if self.signals.get("AutoMode") is False:
             return StationState.MANUAL
@@ -87,13 +102,20 @@ class LiveStation:
             return StationState.IDLE
         return StationState.UNKNOWN
 
+    def active_alarms(self) -> list[AlarmDefinition]:
+        return [alarm for alarm in self.definition.alarms if bool(self.signals.get(f"Alarm:{alarm.alarm_id}"))]
+
     def as_dict(self, endpoint_connected: bool, now: datetime) -> dict[str, Any]:
-        state = self.state(endpoint_connected, now)
+        state = self.state(endpoint_connected, now, self.definition.stale_after_seconds)
         average = self._cycle_total_seconds / self.completed_cycles if self.completed_cycles else None
         last_update = self.last_signal_at.isoformat() if self.last_signal_at else None
         return {
             "id": self.definition.station_id,
             "name": self.definition.name,
+            "process_id": self.definition.process_id,
+            "description": self.definition.description,
+            "physical_order": self.definition.physical_order,
+            "opcua_pending": self.definition.opcua_pending,
             "state": state.value,
             "target_cycle_seconds": self.definition.target_cycle_seconds,
             "last_cycle_seconds": self.last_cycle_seconds,
@@ -109,6 +131,10 @@ class LiveStation:
             "completed_cycles": self.completed_cycles,
             "cycles_over_target": self.cycles_over_target,
             "alarm_code": self.signals.get("AlarmCode"),
+            "active_alarm_sources": [
+                {"id": alarm.alarm_id, "category": alarm.category, "description": alarm.description}
+                for alarm in self.active_alarms()
+            ],
             "auto_mode": self.signals.get("AutoMode"),
             "running": self.signals.get("Running"),
             "last_update": last_update,

@@ -14,11 +14,12 @@
       .station-grid { display:grid; grid-template-columns:1fr 1fr; gap:13px; margin-top:19px; } .value { margin-top:3px; font-size:1.2rem; } .value.negative { color:#ff9696; } .station-footer { display:flex; justify-content:space-between; gap:12px; margin-top:18px; padding-top:12px; border-top:1px solid var(--line); color:var(--muted); font-size:.78rem; } .fault-note { margin-top:14px; color:#ff9696; font-size:.88rem; font-weight:700; }
       aside { display:grid; align-content:start; gap:14px; } .side-card { padding:16px; } .side-card h3 { font-size:1rem; margin-bottom:14px; } .issue,.endpoint { border-top:1px solid var(--line); padding:11px 0; } .issue:first-of-type,.endpoint:first-of-type { border-top:0; padding-top:0; } .issue strong,.endpoint strong { display:block; font-size:.9rem; } .issue span,.endpoint span { color:var(--muted); display:block; font-size:.8rem; margin-top:3px; } .indicator { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; background:var(--down); } .indicator.good { background:var(--run); } .indicator.bad { background:var(--fault); } .empty { color:var(--muted); font-size:.88rem; }
       body[data-view="alerts"] .kpis,body[data-view="alerts"] aside { display:none; } body[data-view="alerts"] .layout { grid-template-columns:1fr; padding-top:24px; } body[data-view="alerts"] .stations { grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); } .incident-card { min-height:190px; } .incident-status { margin:22px 0 8px; font-size:1.05rem; font-weight:800; letter-spacing:.04em; } .incident-card .incident-timer { color:var(--ink); font-size:2rem; font-weight:800; line-height:1.1; } .incident-card .incident-meta { margin-top:7px; color:var(--muted); font-size:.82rem; } .station.alert.MANUAL { border-color:#57a6e7; border-left-color:#57a6e7; background:linear-gradient(140deg,#17334a,#13212e); } .station.alert.MANUAL .pill,.station.alert.MANUAL .fault-note { color:#8ec8fb; } .alerts-empty { display:grid; place-items:center; min-height:230px; padding:30px; border:1px dashed #365849; border-radius:14px; color:var(--muted); text-align:center; } .alerts-empty strong { display:block; color:var(--ink); font-size:1.1rem; margin-bottom:7px; }
+      #timeline-dashboard { display:none; padding:24px 4vw 4vw; } body[data-view="timeline"] .kpis,body[data-view="timeline"] .layout { display:none; } body[data-view="timeline"] #timeline-dashboard { display:grid; gap:18px; } .timeline-panel { border:1px solid var(--line); border-radius:14px; background:linear-gradient(140deg,var(--panel),var(--panel-2)); padding:clamp(16px,2vw,24px); } .timeline-heading { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; } .timeline-heading h2 { margin:0; font-size:1.25rem; } .timeline-heading p { margin:5px 0 0; color:var(--muted); font-size:.86rem; } .timeline-controls { display:flex; flex-wrap:wrap; gap:9px; align-items:end; } .timeline-controls label { display:grid; gap:4px; color:var(--muted); font-size:.7rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; } .timeline-controls input,.timeline-controls select,.timeline-controls button { min-height:36px; border:1px solid #496584; border-radius:7px; background:#12243c; color:#ecf4ff; padding:7px 9px; } .timeline-controls button { cursor:pointer; font-weight:700; background:#244f40; border-color:#527566; } .timeline-legend { display:flex; flex-wrap:wrap; gap:16px; margin:16px 0 11px; color:var(--muted); font-size:.8rem; } .timeline-legend span::before { content:""; display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; vertical-align:-1px; background:var(--timeline-color); } .timeline-legend .micro { --timeline-color:#e8b84b; } .timeline-legend .auto { --timeline-color:#e78a3f; } .timeline-legend .repair { --timeline-color:#e05252; } .timeline-scroll { overflow:auto; border:1px solid var(--line); border-radius:10px; } .timeline-grid { min-width:920px; } .timeline-axis,.timeline-row { display:grid; grid-template-columns:190px minmax(720px,1fr); } .timeline-axis { color:var(--muted); font-size:.72rem; border-bottom:1px solid var(--line); } .timeline-axis > div { padding:9px 11px; } .timeline-axis-track { display:grid; grid-template-columns:repeat(3,1fr); text-align:center; background:linear-gradient(90deg,#162720 0 33.333%,#112019 33.333% 66.666%,#162720 66.666%); } .timeline-row { min-height:35px; border-bottom:1px solid #23372e; } .timeline-row:last-child { border-bottom:0; } .timeline-label { padding:9px 11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.8rem; } .timeline-track { position:relative; background:repeating-linear-gradient(90deg,transparent 0 calc(11.111% - 1px),#2b4137 calc(11.111% - 1px) 11.111%),linear-gradient(90deg,#15251e 0 33.333%,#102019 33.333% 66.666%,#15251e 66.666%); } .timeline-event { position:absolute; top:8px; height:18px; min-width:2px; border-radius:2px; cursor:default; } .timeline-event.micro_stop { background:#e8b84b; } .timeline-event.stop_auto { background:#e78a3f; } .timeline-event.repair_manual { background:#e05252; } .timeline-empty { padding:34px; color:var(--muted); text-align:center; } .timeline-table-wrap { overflow:auto; max-height:430px; border:1px solid var(--line); border-radius:10px; } .timeline-table { width:100%; min-width:840px; border-collapse:collapse; font-size:.84rem; } .timeline-table th,.timeline-table td { padding:10px 12px; text-align:left; border-bottom:1px solid #2b4137; white-space:nowrap; } .timeline-table th { position:sticky; top:0; background:#18281f; color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; } .timeline-table tr:last-child td { border-bottom:0; } .timeline-type { display:inline-block; padding:4px 7px; border-radius:6px; font-weight:700; font-size:.75rem; } .timeline-type.micro_stop { background:#513c10; color:#ffd36b; } .timeline-type.stop_auto { background:#512d17; color:#ffba7b; } .timeline-type.repair_manual { background:#542326; color:#ff9b9b; }
       @media (max-width:1250px) { .kpis { grid-template-columns:repeat(4,minmax(0,1fr)); } } @media (max-width:1050px) { .kpis { grid-template-columns:repeat(3,minmax(0,1fr)); } .layout { grid-template-columns:1fr; } aside { grid-template-columns:repeat(2,minmax(0,1fr)); } } @media (max-width:620px) { header { flex-direction:column; align-items:flex-start; } .kpis,aside { grid-template-columns:1fr; } .layout { padding-bottom:24px; } .header-actions { flex-wrap:wrap; } }
     </style>
   </head>
   <body>
-    <header><div><div id="page-eyebrow" class="eyebrow">RupMES Edge · avisos de incidencias</div><h1 id="line-name">RupMES Edge</h1></div><div class="header-actions"><div class="view-switcher" aria-label="Vista del dashboard"><button id="alerts-view" class="view-button active" type="button" aria-pressed="true">Avisos</button><button id="analysis-view" class="view-button" type="button" aria-pressed="false">Análisis</button></div><button id="edge-settings" class="settings-button" type="button">Configuration</button><div id="connection" class="status">CONNECTING</div></div></header>
+    <header><div><div id="page-eyebrow" class="eyebrow">RupMES Edge · avisos de incidencias</div><h1 id="line-name">RupMES Edge</h1></div><div class="header-actions"><div class="view-switcher" aria-label="Vista del dashboard"><button id="alerts-view" class="view-button active" type="button" aria-pressed="true">Avisos</button><button id="analysis-view" class="view-button" type="button" aria-pressed="false">Análisis</button><button id="timeline-view" class="view-button" type="button" aria-pressed="false">Paros</button></div><button id="edge-settings" class="settings-button" type="button">Configuration</button><div id="connection" class="status">CONNECTING</div></div></header>
     <section class="kpis">
       <div id="production-counter-cards"></div>
       <div class="kpi"><span class="label">Stations running</span><strong id="running">0 / 0</strong><span id="running-detail" class="detail">--</span></div>
@@ -27,6 +28,10 @@
       <div class="kpi"><span class="label">Current bottleneck</span><strong id="bottleneck">--</strong><span id="bottleneck-detail" class="detail">Waiting for cycles</span></div>
     </section>
     <div class="layout"><main id="stations" class="stations"></main><aside><section class="side-card"><h3>Attention required</h3><div id="issues"></div></section><section class="side-card"><h3>OPC UA endpoints</h3><div id="endpoints"></div><p class="muted" style="margin:14px 0 0;font-size:.78rem">Last refresh: <span id="updated">--:--:--</span></p></section></aside></div>
+    <section id="timeline-dashboard" aria-labelledby="timeline-title">
+      <section class="timeline-panel"><div class="timeline-heading"><div><h2 id="timeline-title">Paros por estación</h2><p id="timeline-summary">Historial de estados registrado por el Edge.</p></div><div class="timeline-controls"><label>Hasta<input id="timeline-date" type="date"></label><label>Días<select id="timeline-days"><option value="1">1</option><option value="7" selected>7</option><option value="14">14</option></select></label><label>Estación<select id="timeline-station"><option value="">Todas las estaciones</option></select></label><button id="timeline-load" type="button">Actualizar</button></div></div><div class="timeline-legend"><span class="micro">Micro-paro (≤ 60 s)</span><span class="auto">Paro en automático</span><span class="repair">Avería / manual</span></div><div id="timeline-chart" class="timeline-scroll"><div class="timeline-empty">Seleccione la pestaña Paros para cargar el historial.</div></div></section>
+      <section class="timeline-panel"><div class="timeline-heading"><div><h2>Todos los paros registrados</h2><p>Use los filtros para localizar una incidencia concreta. La duración se calcula entre cambios de estado registrados.</p></div><div class="timeline-controls"><label>Tipo<select id="timeline-type-filter"><option value="">Todos</option><option value="micro_stop">Micro-paro</option><option value="stop_auto">Paro automático</option><option value="repair_manual">Avería / manual</option></select></label><label>Turno<select id="timeline-shift-filter"><option value="">Todos</option><option value="TM">TM 06–14</option><option value="TT">TT 14–22</option><option value="TN">TN 22–06</option></select></label></div></div><div id="timeline-table" class="timeline-table-wrap"><div class="timeline-empty">No hay datos cargados.</div></div></section>
+    </section>
     <script>
       const number = value => value == null ? '--' : Number(value).toFixed(1);
       const time = value => value ? new Date(value).toLocaleTimeString() : '--';
@@ -50,20 +55,29 @@
         if (activeView === 'alerts') {
           return `<article class="station alert incident-card ${escape(station.state)}"><div class="station-head"><div><h2>${escape(station.name)}</h2><div class="station-code">Máquina / estación · ${escape(station.id)}</div></div><span class="pill">${escape(station.state)}</span></div><div class="incident-status">${incidentLabel}</div>${station.state === 'FAULT' && station.alarm_code ? `<div class="fault-note">FALLO PLC · ${escape(station.alarm_code)}</div>` : ''}<div class="incident-timer">${elapsed(station.incident_since || station.state_since || station.last_update)}</div><div class="incident-meta">Tiempo transcurrido desde la activación</div></article>`;
         }
-        return `<article class="station ${escape(station.state)} ${requiresAttention(station) ? 'alert' : ''}"><div class="station-head"><div><h2>${escape(station.name)}</h2><div class="station-code">${escape(station.id)}</div>${station.is_output_station ? '<div class="output">LINE OUTPUT STATION</div>' : ''}</div><span class="pill">${escape(station.state)}</span></div><div class="station-grid"><div><div class="label">PLC cycle time</div><div class="value">${number(displayedCycle)} s</div></div><div><div class="label">Target</div><div class="value">${number(station.target_cycle_seconds)} s</div></div><div><div class="label">Deviation</div><div class="value ${deviation > 0 ? 'negative' : ''}">${deviation == null ? '--' : `${deviation > 0 ? '+' : ''}${number(deviation)} s`}</div></div><div><div class="label">NOK counter</div><div class="value">${station.parts_counter ?? '--'}</div></div><div><div class="label">Average cycle</div><div class="value">${number(station.average_cycle_seconds)} s</div></div><div><div class="label">Cycles over target</div><div class="value">${station.cycles_over_target}</div></div></div>${requiresAttention(station) ? `<div class="fault-note">${incidentLabel}${incidentDetail}</div>` : ''}<div class="station-footer"><span>${mode}</span><span>Updated ${time(station.last_update)}</span></div></article>`;
+        const physicalReference = [station.process_id, station.id].filter(Boolean).join(' · ');
+        const physicalDescription = station.description ? `<div class="station-code">${escape(station.description)}</div>` : '';
+        const pendingNotice = station.opcua_pending ? '<div class="fault-note">OPC UA TAGS PENDING CONFIRMATION</div>' : '';
+        return `<article class="station ${escape(station.state)} ${requiresAttention(station) ? 'alert' : ''}"><div class="station-head"><div><h2>${escape(station.name)}</h2><div class="station-code">${escape(physicalReference)}</div>${physicalDescription}${station.is_output_station ? '<div class="output">LINE OUTPUT STATION</div>' : ''}</div><span class="pill">${escape(station.state)}</span></div><div class="station-grid"><div><div class="label">PLC cycle time</div><div class="value">${number(displayedCycle)} s</div></div><div><div class="label">Target</div><div class="value">${number(station.target_cycle_seconds)} s</div></div><div><div class="label">Deviation</div><div class="value ${deviation > 0 ? 'negative' : ''}">${deviation == null ? '--' : `${deviation > 0 ? '+' : ''}${number(deviation)} s`}</div></div><div><div class="label">NOK counter</div><div class="value">${station.parts_counter ?? '--'}</div></div><div><div class="label">Average cycle</div><div class="value">${number(station.average_cycle_seconds)} s</div></div><div><div class="label">Cycles over target</div><div class="value">${station.cycles_over_target}</div></div></div>${pendingNotice}${requiresAttention(station) ? `<div class="fault-note">${incidentLabel}${incidentDetail}</div>` : ''}<div class="station-footer"><span>${mode}</span><span>Updated ${time(station.last_update)}</span></div></article>`;
       };
       function selectView(view) {
         activeView = view;
         document.body.dataset.view = view;
         const alerts = view === 'alerts';
+        const analysis = view === 'analysis';
+        const timeline = view === 'timeline';
         document.querySelector('#alerts-view').classList.toggle('active', alerts);
-        document.querySelector('#analysis-view').classList.toggle('active', !alerts);
+        document.querySelector('#analysis-view').classList.toggle('active', analysis);
+        document.querySelector('#timeline-view').classList.toggle('active', timeline);
         document.querySelector('#alerts-view').setAttribute('aria-pressed', String(alerts));
-        document.querySelector('#analysis-view').setAttribute('aria-pressed', String(!alerts));
-        document.querySelector('#page-eyebrow').textContent = alerts ? 'RupMES Edge · avisos de incidencias' : 'RupMES Edge · análisis de producción';
+        document.querySelector('#analysis-view').setAttribute('aria-pressed', String(analysis));
+        document.querySelector('#timeline-view').setAttribute('aria-pressed', String(timeline));
+        document.querySelector('#page-eyebrow').textContent = alerts ? 'RupMES Edge · avisos de incidencias' : analysis ? 'RupMES Edge · análisis de producción' : 'RupMES Edge · historial de paros';
+        document.dispatchEvent(new CustomEvent('edgeviewchange', {detail:{view}}));
       }
       document.querySelector('#alerts-view').addEventListener('click', () => selectView('alerts'));
       document.querySelector('#analysis-view').addEventListener('click', () => selectView('analysis'));
+      document.querySelector('#timeline-view').addEventListener('click', () => selectView('timeline'));
       selectView('alerts');
       function renderLineCycle(lineCycle) {
         let card = document.querySelector('#line-cycle-kpi');
@@ -111,12 +125,17 @@
               incidentStartedAt.delete(station.id);
               return;
             }
-            const backendSince = Date.parse(station.state_since || "");
-            const startedAt = Number.isFinite(backendSince)
-              ? backendSince
-              : previous?.state === station.state
-                ? previous.startedAt
-                : Date.now();
+            const parsedBackendSince = Date.parse(station.state_since || "");
+            // A PLC can publish local wall-clock timestamps marked as UTC.
+            // Do not let a future timestamp pin the timer at 00:00:00.
+            const backendSince = Number.isFinite(parsedBackendSince) && parsedBackendSince <= Date.now() + 5_000
+              ? parsedBackendSince
+              : NaN;
+            const startedAt = previous?.state === station.state
+              // Keep the original onset while the state remains unchanged.
+              // Some PLCs refresh state_since with each polling sample.
+              ? (Number.isFinite(backendSince) && backendSince < previous.startedAt ? backendSince : previous.startedAt)
+              : (Number.isFinite(backendSince) ? backendSince : Date.now());
             incidentStartedAt.set(station.id, { state: station.state, startedAt });
             station.incident_since = new Date(startedAt).toISOString();
           });
@@ -423,6 +442,130 @@
         saveButton.parentElement?.before(section);
       }
       new MutationObserver(injectLineCycleFields).observe(document.body, {childList:true, subtree:true});
+    })();
+  </script>
+  <script>
+    (() => {
+      const dateInput = document.querySelector('#timeline-date');
+      const daysInput = document.querySelector('#timeline-days');
+      const stationInput = document.querySelector('#timeline-station');
+      const typeInput = document.querySelector('#timeline-type-filter');
+      const shiftInput = document.querySelector('#timeline-shift-filter');
+      const chart = document.querySelector('#timeline-chart');
+      const table = document.querySelector('#timeline-table');
+      const summary = document.querySelector('#timeline-summary');
+      let timeline = null;
+
+      dateInput.value = new Date().toLocaleDateString('en-CA');
+      const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+      const duration = seconds => {
+        const value = Math.max(0, Math.round(Number(seconds) || 0));
+        return `${String(Math.floor(value / 3600)).padStart(2, '0')}:${String(Math.floor(value / 60) % 60).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
+      };
+      const typeLabel = type => ({micro_stop:'Micro-paro', stop_auto:'Paro automático', repair_manual:'Avería / manual'})[type] || type;
+      const localTime = value => new Date(value).toLocaleString([], {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+
+      function filteredEvents() {
+        if (!timeline) return [];
+        return timeline.events.filter(event => (!typeInput.value || event.type === typeInput.value) && (!shiftInput.value || event.shift === shiftInput.value));
+      }
+
+      function populateStations(stations) {
+        const previous = stationInput.value;
+        stationInput.innerHTML = '<option value="">Todas las estaciones</option>' + stations
+          .sort((a, b) => (a.physical_order ?? 999) - (b.physical_order ?? 999) || a.id.localeCompare(b.id))
+          .map(station => `<option value="${escapeHtml(station.id)}">${escapeHtml([station.process_id, station.id, station.name].filter(Boolean).join(' · '))}</option>`)
+          .join('');
+        stationInput.value = [...stationInput.options].some(option => option.value === previous) ? previous : '';
+      }
+
+      function renderChart() {
+        if (!timeline) return;
+        const events = filteredEvents();
+        const selected = stationInput.value;
+        const start = new Date(timeline.day_start).getTime();
+        const end = new Date(timeline.day_end).getTime();
+        const range = Math.max(1, end - start);
+        const stationById = new Map(timeline.stations.map(station => [station.id, station]));
+        const dayCount = Number(daysInput.value);
+        const labelFor = station => [station.process_id, station.id, station.name].filter(Boolean).join(' · ');
+        let rows;
+        if (selected) {
+          rows = Array.from({length: dayCount}, (_, index) => {
+            const day = new Date(`${timeline.first_day}T12:00:00`);
+            day.setDate(day.getDate() + index);
+            const productionDay = day.toLocaleDateString([], {weekday:'short', day:'2-digit', month:'2-digit'});
+            return {key: productionDay, label: productionDay, events: events.filter(event => event.production_day === day.toLocaleDateString('en-CA'))};
+          });
+        } else {
+          rows = timeline.stations.map(station => ({key:station.id, label:labelFor(station), events:events.filter(event => event.station_id === station.id)}));
+        }
+        const headerLabels = Array.from({length: dayCount}, (_, index) => {
+          const day = new Date(`${timeline.first_day}T12:00:00`);
+          day.setDate(day.getDate() + index);
+          return `<div>${day.toLocaleDateString([], {weekday:'short', day:'2-digit', month:'2-digit'})}<br><small>06:00–06:00</small></div>`;
+        }).join('');
+        const rowHtml = rows.map(row => {
+          const localRangeStart = selected ? new Date(`${row.key === row.label ? timeline.first_day : timeline.first_day}T00:00:00`).getTime() : start;
+          const rowStart = selected
+            ? start + rows.indexOf(row) * 24 * 60 * 60 * 1000
+            : start;
+          const rowEnd = selected ? Math.min(rowStart + 24 * 60 * 60 * 1000, end) : end;
+          const rowRange = Math.max(1, rowEnd - rowStart);
+          const bands = row.events.map(event => {
+            const eventStart = new Date(event.started_at).getTime();
+            const eventEnd = new Date(event.ended_at).getTime();
+            const left = Math.max(0, (eventStart - rowStart) / rowRange * 100);
+            const width = Math.max(0.3, Math.min(100 - left, (eventEnd - eventStart) / rowRange * 100));
+            const tip = `${labelFor(stationById.get(event.station_id) || {id:event.station_id})} · ${typeLabel(event.type)} · ${duration(event.duration_seconds)} · ${localTime(event.started_at)}`;
+            return `<span class="timeline-event ${escapeHtml(event.type)}" title="${escapeHtml(tip)}" style="left:${left}%;width:${width}%"></span>`;
+          }).join('');
+          return `<div class="timeline-row"><div class="timeline-label" title="${escapeHtml(row.label)}">${escapeHtml(row.label)}</div><div class="timeline-track">${bands}</div></div>`;
+        }).join('');
+        const heading = selected ? 'Una fila por día de producción' : 'Una fila por estación';
+        summary.textContent = `${heading}. ${events.length} paros registrados entre ${timeline.first_day} y ${timeline.last_day}; turno TM 06–14, TT 14–22, TN 22–06.`;
+        chart.innerHTML = rows.length
+          ? `<div class="timeline-grid"><div class="timeline-axis"><div>${selected ? 'Día de producción' : 'Estación'}</div><div class="timeline-axis-track" style="grid-template-columns:repeat(${dayCount},1fr)">${headerLabels}</div></div>${rowHtml}</div>`
+          : '<div class="timeline-empty">No hay estaciones disponibles para el filtro seleccionado.</div>';
+      }
+
+      function renderTable() {
+        const events = filteredEvents().slice().sort((a, b) => Date.parse(b.started_at) - Date.parse(a.started_at));
+        const stationById = new Map((timeline?.stations || []).map(station => [station.id, station]));
+        if (!events.length) {
+          table.innerHTML = '<div class="timeline-empty">No hay paros registrados para los filtros seleccionados.</div>';
+          return;
+        }
+        table.innerHTML = `<table class="timeline-table"><thead><tr><th>Inicio</th><th>Estación</th><th>Turno</th><th>Tipo</th><th>Estado</th><th>Duración</th><th>Detalle PLC</th></tr></thead><tbody>${events.map(event => {
+          const station = stationById.get(event.station_id) || {id:event.station_id};
+          return `<tr><td>${escapeHtml(localTime(event.started_at))}</td><td>${escapeHtml([station.process_id, station.id, station.name].filter(Boolean).join(' · '))}</td><td>${escapeHtml(event.shift)}</td><td><span class="timeline-type ${escapeHtml(event.type)}">${escapeHtml(typeLabel(event.type))}</span></td><td>${escapeHtml(event.state)}</td><td>${duration(event.duration_seconds)}</td><td>${escapeHtml(event.detail || '—')}</td></tr>`;
+        }).join('')}</tbody></table>`;
+      }
+
+      function render() { renderChart(); renderTable(); }
+      async function loadTimeline() {
+        chart.innerHTML = '<div class="timeline-empty">Cargando historial de paros…</div>';
+        table.innerHTML = '<div class="timeline-empty">Cargando historial de paros…</div>';
+        try {
+          const query = new URLSearchParams({selected_date:dateInput.value, days:daysInput.value});
+          if (stationInput.value) query.set('station_id', stationInput.value);
+          const response = await fetch(`/edge/api/timeline?${query}`, {cache:'no-store'});
+          if (!response.ok) throw new Error(`No se pudo cargar el historial (${response.status})`);
+          timeline = await response.json();
+          populateStations(timeline.stations || []);
+          render();
+        } catch (error) {
+          const message = `<div class="timeline-empty">${escapeHtml(error.message || 'No se pudo cargar el historial.')}</div>`;
+          chart.innerHTML = message; table.innerHTML = message;
+        }
+      }
+      document.querySelector('#timeline-load').addEventListener('click', loadTimeline);
+      dateInput.addEventListener('change', loadTimeline);
+      daysInput.addEventListener('change', loadTimeline);
+      stationInput.addEventListener('change', loadTimeline);
+      typeInput.addEventListener('change', render);
+      shiftInput.addEventListener('change', render);
+      document.addEventListener('edgeviewchange', event => { if (event.detail.view === 'timeline' && !timeline) loadTimeline(); });
     })();
   </script>
 </body>

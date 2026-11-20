@@ -521,6 +521,39 @@ class ProductionReportIngestCreate(ProductionReportCreate):
         return cleaned
 
 
+StoppageReason = Literal["FAULT", "MANUAL", "STOPPED", "WAITING", "COMMUNICATION_LOSS"]
+
+
+class StoppageEventIngest(BaseModel):
+    source_event_id: str = Field(..., min_length=1, max_length=64)
+    line_id: str = Field(..., min_length=1, max_length=100)
+    station_id: str = Field(..., min_length=1, max_length=100)
+    started_at: datetime
+    ended_at: datetime | None = None
+    duration_seconds: Decimal | None = Field(None, ge=0, decimal_places=3)
+    reason: StoppageReason
+    source_state: str = Field(..., min_length=1, max_length=40)
+    shift: Literal["TM", "TT", "TN"]
+    confidence: Decimal = Field(..., ge=0, le=1, decimal_places=3)
+    edge_updated_at: datetime
+
+    @model_validator(mode="after")
+    def validate_time_range(self) -> "StoppageEventIngest":
+        if self.ended_at is not None and self.ended_at < self.started_at:
+            raise ValueError("ended_at cannot precede started_at")
+        return self
+
+
+class StoppageBatchIngest(BaseModel):
+    events: list[StoppageEventIngest] = Field(..., min_length=1, max_length=200)
+
+
+class StoppageBatchIngestResult(BaseModel):
+    accepted: int
+    inserted: int
+    updated: int
+
+
 class ProductionReportRead(BaseModel):
     id: int
     plant_code: Optional[str]

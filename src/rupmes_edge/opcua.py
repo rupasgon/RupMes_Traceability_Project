@@ -47,6 +47,7 @@ class OpcUaSubscriptionCollector:
         on_health: HealthCallback,
         subscription_interval_ms: int = 500,
         line_node_map: dict[str, str] | None = None,
+        alarm_node_map: dict[str, list[tuple[str, str]]] | None = None,
         on_line_signal: LineSignalCallback | None = None,
         on_state_tick: StateTickCallback | None = None,
     ):
@@ -56,6 +57,7 @@ class OpcUaSubscriptionCollector:
         self.on_health = on_health
         self.subscription_interval_ms = subscription_interval_ms
         self.line_node_map = line_node_map or {}
+        self.alarm_node_map = alarm_node_map or {}
         self.on_line_signal = on_line_signal
         self.on_state_tick = on_state_tick
         self._stopped = asyncio.Event()
@@ -89,6 +91,10 @@ class OpcUaSubscriptionCollector:
                 for station in self.stations:
                     for metric, node_id in station.node_map.items():
                         node_metrics.setdefault(node_id, []).append((station.station_id, metric))
+                    for alarm in station.alarms:
+                        configured = next((item for item in self._configured_alarms(station.station_id) if item[0] == alarm.alarm_id), None)
+                        if configured:
+                            node_metrics.setdefault(configured[1], []).append((station.station_id, f"Alarm:{alarm.alarm_id}"))
                 line_nodes = self.line_node_map
                 configured_counter_nodes: list[tuple[str, str, str, str]] = []
                 for counter in self.endpoint.production_counters:
@@ -164,6 +170,14 @@ class OpcUaSubscriptionCollector:
 
     def stop(self) -> None:
         self._stopped.set()
+
+    def _configured_alarms(self, station_id: str) -> list[tuple[str, str]]:
+        """Resolve alarm NodeIds from the immutable runtime station list.
+
+        StationDefinition contains the dashboard metadata, while the collector
+        receives NodeIds from the endpoint configuration via this private map.
+        """
+        return self.alarm_node_map.get(station_id, [])
 
 
 class LineCycleCollector:

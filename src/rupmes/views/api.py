@@ -113,7 +113,7 @@ from rupmes.models import (
     TbTenants,
     TbUsers,
 )
-from rupmes.models import IntegrationDeliveryRule, IntegrationServer, ProductionIngestClient, TraceabilityMeasurement
+from rupmes.models import IntegrationDeliveryRule, IntegrationServer, ProductionIngestClient, StoppageEvent, TraceabilityMeasurement
 from rupmes.services.security import hash_password
 from rupmes.services.integration_credentials import decrypt_oauth_credentials, encrypt_oauth_credentials
 from rupmes.views.auth import (
@@ -175,6 +175,8 @@ from rupmes.views.schemas import (
     ProductionReportCreate,
     ProductionReportIngestCreate,
     ProductionReportRead,
+    StoppageBatchIngest,
+    StoppageBatchIngestResult,
     StatusCreate,
     StatusRead,
     StatusUpdate,
@@ -938,6 +940,31 @@ def ingest_production_report_endpoint(
         db.rollback()
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Production report already exists or data invalid")
     return _serialize_production_report(row)
+
+
+@app.post("/stoppage-events/ingest", response_model=StoppageBatchIngestResult)
+def ingest_stoppage_events_endpoint(payload: StoppageBatchIngest, request: Request, db: Session = Depends(get_db)):
+    """Upsert Edge downtime events. Replays are safe and required for OT recovery."""
+    client = require_production_ingest_api_key(request, db)
+    tenant_id = client.tenant_id if client is not None else get_default_tenant_id()
+    inserted = updated = 0
+    for item in payload.events:
+        if client is not None and client.line_code and item.line_id != client.line_code:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Line scope mismatch")
+        row = db.execute(select(StoppageEvent).where(
+            StoppageEvent.tenant_id == tenant_id,
+            StoppageEvent.source_event_id == item.source_event_id,
+        )).scalar_one_or_none()
+        values = item.model_dump()
+        if row is None:
+            db.add(StoppageEvent(**values, tenant_id=tenant_id))
+            inserted += 1
+        elif item.edge_updated_at >= row.edge_updated_at:
+            for field, value in values.items():
+                setattr(row, field, value)
+            updated += 1
+    db.commit()
+    return StoppageBatchIngestResult(accepted=len(payload.events), inserted=inserted, updated=updated)
 
 
 @app.get("/production-reports/analytics/daily-total", response_model=list[DailyProductionTotalRead])

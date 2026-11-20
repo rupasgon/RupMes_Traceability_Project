@@ -43,15 +43,6 @@ class TbPlants(Base):
     create_date: Mapped[datetime] = mapped_column(DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False)
 
 
-class TbPlants(Base):
-    __tablename__ = "tb_plants"
-    id_row: Mapped[int] = mapped_column(Integer, Identity(), primary_key=True)
-    plant_id: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
-    description_plant: Mapped[str] = mapped_column(String(100), nullable=False)
-    tenant_id: Mapped[str] = mapped_column(String(50), ForeignKey("tb_tenants.tenant_id"), nullable=False, server_default=text("'DEFAULT'"))
-    create_date: Mapped[datetime] = mapped_column(DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False)
-
-
 class TbTenants(Base):
     __tablename__ = "tb_tenants"
 
@@ -515,6 +506,36 @@ class ProductionReport(Base):
         Index("ix_production_report_line_datetime", "line_code", "production_datetime"),
         Index("ix_production_report_result", "result"),
         Index("ix_production_report_error_code", "error_code"),
+    )
+
+
+class StoppageEvent(Base):
+    """An idempotently-ingested, classified downtime event from an Edge."""
+
+    __tablename__ = "stoppage_events"
+
+    id: Mapped[int] = mapped_column(BigInteger().with_variant(Integer, "sqlite"), Identity(), primary_key=True)
+    source_event_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    line_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    station_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    duration_seconds: Mapped[float | None] = mapped_column(Numeric(14, 3))
+    reason: Mapped[str] = mapped_column(String(40), nullable=False)
+    source_state: Mapped[str] = mapped_column(String(40), nullable=False)
+    shift: Mapped[str] = mapped_column(String(10), nullable=False)
+    confidence: Mapped[float] = mapped_column(Numeric(5, 3), nullable=False)
+    edge_updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+    tenant_id: Mapped[str] = mapped_column(String(50), ForeignKey("tb_tenants.tenant_id"), nullable=False, server_default=text("'DEFAULT'"))
+
+    __table_args__ = (
+        CheckConstraint("duration_seconds IS NULL OR duration_seconds >= 0", name="ck_stoppage_events_duration_non_negative"),
+        CheckConstraint("confidence >= 0 AND confidence <= 1", name="ck_stoppage_events_confidence_range"),
+        UniqueConstraint("tenant_id", "source_event_id", name="uq_stoppage_events_source_event"),
+        Index("ix_stoppage_events_tenant_line_started", "tenant_id", "line_id", "started_at"),
+        Index("ix_stoppage_events_tenant_station_started", "tenant_id", "station_id", "started_at"),
+        Index("ix_stoppage_events_tenant_reason_started", "tenant_id", "reason", "started_at"),
     )
 
 

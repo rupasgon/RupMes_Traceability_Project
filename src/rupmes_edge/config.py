@@ -7,7 +7,9 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, SecretStr, field_validator, model_validator
 
-from rupmes_edge.domain import StationDefinition
+from rupmes_edge.bmw_station_catalog import get_bmw_station_metadata
+from rupmes_edge.domain import AlarmDefinition, StationDefinition
+from rupmes_edge.stoppages import StoppagePolicy
 
 
 SIMULATOR_ENDPOINT = "opc.tcp://127.0.0.1:4840/rupmes/simulator/"
@@ -92,6 +94,10 @@ class StationConfig(BaseModel):
     stale_after_seconds: float = Field(default=5, ge=1, le=3600)
     is_output_station: bool = False
     node_map: dict[str, str] = Field(min_length=1)
+    process_id: str | None = Field(default=None, max_length=20)
+    description: str | None = Field(default=None, max_length=200)
+    physical_order: int | None = Field(default=None, ge=1)
+    alarms: list["AlarmSignalConfig"] = Field(default_factory=list)
 
     @field_validator("node_map")
     @classmethod
@@ -103,6 +109,22 @@ class StationConfig(BaseModel):
         if any(not node_id.strip() for node_id in value.values()):
             raise ValueError("NodeIds cannot be blank")
         return value
+
+
+class AlarmSignalConfig(BaseModel):
+    """A read-only PLC alarm tag linked to one physical station."""
+
+    alarm_id: str = Field(pattern=r"^[A-Za-z0-9_-]+$")
+    node_id: str = Field(min_length=1)
+    category: Literal["FMS", "FEED", "ROBOT", "VIBRATING", "TRANSIT", "PROCESS"]
+    description: str | None = Field(default=None, max_length=200)
+
+    @field_validator("node_id")
+    @classmethod
+    def validate_alarm_node_id(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("Alarm NodeIds cannot be blank")
+        return value.strip()
 
 
 class LineCycleConfig(BaseModel):
@@ -126,6 +148,17 @@ class StorageConfig(BaseModel):
     retention_days: int = Field(default=30, ge=1, le=3650)
 
 
+class StoppagePolicyConfig(BaseModel):
+    """Debounce rules for durable stoppage events; PLC polling is unchanged."""
+
+    open_after_seconds: float = Field(default=5, ge=0, le=3600)
+    close_after_seconds: float = Field(default=3, ge=0, le=3600)
+    micro_stop_seconds: float = Field(default=60, gt=0, le=3600)
+
+    def to_domain(self) -> StoppagePolicy:
+        return StoppagePolicy(**self.model_dump())
+
+
 class AdminConfig(BaseModel):
     bind_host: str = "127.0.0.1"
     port: int = Field(default=8020, ge=1024, le=65535)
@@ -139,22 +172,11 @@ class EdgeConfig(BaseModel):
     timezone: str = "Europe/Madrid"
     demo_mode: bool = False
     storage: StorageConfig = Field(default_factory=StorageConfig)
+    stoppage_policy: StoppagePolicyConfig = Field(default_factory=StoppagePolicyConfig)
     admin: AdminConfig = Field(default_factory=AdminConfig)
     endpoints: list[OpcUaEndpointConfig] = Field(min_length=1)
     stations: list[StationConfig] = Field(min_length=1)
     line_cycle: LineCycleConfig | None = None
-    line_node_map: dict[str, str] = Field(default_factory=dict)
-
-    @field_validator("line_node_map")
-    @classmethod
-    def validate_line_node_map(cls, value: dict[str, str]) -> dict[str, str]:
-        allowed = {"Total", "TotalOK", "TotalNOK", "WI", "WIOK", "WINOK", "DI", "DIOK", "DINOK", "Heartbeat"}
-        unknown = set(value) - allowed
-        if unknown:
-            raise ValueError(f"Unsupported line metric(s): {', '.join(sorted(unknown))}")
-        if any(not node_id.strip() for node_id in value.values()):
-            raise ValueError("Line NodeIds cannot be blank")
-        return value
     # Optional production counters.  The standard BMW interface is detected
     # automatically when this is omitted, keeping old configurations valid.
     line_node_map: dict[str, str] = Field(default_factory=dict)
@@ -178,6 +200,10 @@ class EdgeConfig(BaseModel):
         station_ids = [station.station_id for station in self.stations]
         if len(station_ids) != len(set(station_ids)):
             raise ValueError("Station IDs must be unique")
+        for station in self.stations:
+            alarm_ids = [alarm.alarm_id for alarm in station.alarms]
+            if len(alarm_ids) != len(set(alarm_ids)):
+                raise ValueError(f"Station {station.station_id} has duplicate alarm IDs")
         missing = {station.endpoint_id for station in self.stations} - set(endpoint_ids)
         if missing:
             raise ValueError(f"Stations reference undefined endpoint(s): {', '.join(sorted(missing))}")
@@ -190,7 +216,29 @@ class EdgeConfig(BaseModel):
         return self
 
     def station_definitions(self) -> list[StationDefinition]:
-        return [StationDefinition(station_id=item.station_id, name=item.name, target_cycle_seconds=item.target_cycle_seconds, node_map=item.node_map, endpoint_id=item.endpoint_id, is_output_station=item.is_output_station) for item in self.stations]
+        definitions = []
+        for item in self.stations:
+            metadata = get_bmw_station_metadata(item.station_id)
+            definitions.append(
+                StationDefinition(
+                    station_id=item.station_id,
+                    name=item.name,
+                    target_cycle_seconds=item.target_cycle_seconds,
+                    node_map=item.node_map,
+                    endpoint_id=item.endpoint_id,
+                    stale_after_seconds=item.stale_after_seconds,
+                    is_output_station=item.is_output_station,
+                    process_id=item.process_id or (metadata.process_id if metadata else None),
+                    description=item.description or (metadata.description if metadata else item.name),
+                    physical_order=item.physical_order or (metadata.order if metadata else None),
+                    opcua_pending=bool(metadata and metadata.opcua_pending),
+                    alarms=tuple(
+                        AlarmDefinition(alarm.alarm_id, alarm.category, alarm.description)
+                        for alarm in item.alarms
+                    ),
+                )
+            )
+        return definitions
 
     def sanitized(self) -> dict:
         result = self.model_dump()

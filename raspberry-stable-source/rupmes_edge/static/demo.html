@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RupMES Edge · Andon demo</title>
+  <style>
+    :root { color-scheme: dark; --bg:#07111f; --panel:#0d1b2e; --line:#24354e; --text:#ecf4ff; --muted:#93a7c2; --green:#31d18b; --amber:#ffbf52; --red:#ff6573; --blue:#6ea7ff; }
+    * { box-sizing:border-box; } body { margin:0; background:var(--bg); color:var(--text); font:14px Inter,Segoe UI,Arial,sans-serif; }
+    header { display:flex; justify-content:space-between; align-items:center; padding:22px clamp(18px,4vw,56px); border-bottom:1px solid var(--line); background:linear-gradient(110deg,#0b1d35,#07111f); }
+    h1 { margin:0; font-size:22px; } .sub { color:var(--muted); margin-top:5px; } .pill { border:1px solid #1e8c68; color:var(--green); background:#0b2d27; border-radius:999px; padding:8px 12px; font-weight:700; }
+    main { max-width:1500px; margin:auto; padding:28px clamp(18px,4vw,56px); } .label { color:var(--muted); font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.06em; }
+    .kpis { display:grid; grid-template-columns:repeat(5,minmax(150px,1fr)); gap:14px; margin:0 0 26px; } .card,.station,.panel { background:var(--panel); border:1px solid var(--line); border-radius:12px; box-shadow:0 8px 30px #0002; }
+    .kpi { padding:17px; } .value { font-size:28px; font-weight:800; margin-top:8px; } .ok { color:var(--green); } .warn { color:var(--amber); } .bad { color:var(--red); }
+    .section { display:flex; justify-content:space-between; align-items:baseline; margin:24px 0 12px; } h2 { margin:0; font-size:17px; } .stations { display:grid; grid-template-columns:repeat(4,minmax(220px,1fr)); gap:14px; }
+    .station { padding:17px; border-top:3px solid var(--green); } .station.fault { border-top-color:var(--red); } .station.idle { border-top-color:var(--amber); }
+    .title { display:flex; justify-content:space-between; gap:8px; font-size:16px; font-weight:800; } .state { font-size:11px; border-radius:5px; padding:4px 7px; background:#123725; color:var(--green); } .fault .state { background:#411b27; color:var(--red); } .idle .state { background:#3b2b11; color:var(--amber); }
+    .id { color:var(--muted); margin:5px 0 16px; font-size:12px; } .metrics { display:grid; grid-template-columns:1fr 1fr; gap:12px; } .metric b { display:block; margin-top:4px; font-size:17px; }
+    .bottom { display:grid; grid-template-columns:1.1fr .9fr; gap:14px; margin-top:26px; } .panel { padding:18px; } .row { display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--line); } .row:last-child { border:0; } .tag { font-weight:700; font-size:11px; padding:4px 7px; border-radius:4px; } .red { background:#411b27; color:var(--red); } .orange { background:#3b2b11; color:var(--amber); }
+    footer { color:var(--muted); text-align:right; margin-top:16px; font-size:12px; }
+    @media(max-width:1050px){.kpis{grid-template-columns:repeat(3,1fr)}.stations{grid-template-columns:repeat(2,1fr)}} @media(max-width:600px){header{align-items:flex-start;gap:12px;flex-direction:column}.kpis,.stations,.bottom{grid-template-columns:1fr}.kpis{gap:10px}}
+  </style>
+</head>
+<body>
+  <header><div><h1>RupMES Edge · Line Andon</h1><div class="sub">BMW SZL EOLT · Local read-only dashboard</div></div><div class="pill">● OPC UA CONNECTED</div></header>
+  <main>
+    <div class="kpis">
+      <div class="card kpi"><div class="label">Line output</div><div class="value">1,248</div><div class="sub">Packaging station</div></div>
+      <div class="card kpi"><div class="label">Stations running</div><div class="value ok">3 / 4</div><div class="sub">1 needs attention</div></div>
+      <div class="card kpi"><div class="label">Active alarms</div><div class="value bad">1</div><div class="sub">Assembly · E203</div></div>
+      <div class="card kpi"><div class="label">Observed cycles</div><div class="value">1,264</div><div class="sub"><span class="warn">38 over target</span></div></div>
+      <div class="card kpi"><div class="label">Current bottleneck</div><div class="value warn">EOLT</div><div class="sub">22.8 s / target 20 s</div></div>
+    </div>
+    <div class="section"><h2>Station status</h2><span class="sub">Live values simulated for demonstration</span></div>
+    <div class="stations">
+      <article class="station"><div class="title">Feeding <span class="state">RUNNING</span></div><div class="id">ST01 · Auto mode</div><div class="metrics"><div class="metric"><span class="label">Last cycle</span><b>14.2 s</b></div><div class="metric"><span class="label">Target</span><b>15.0 s</b></div><div class="metric"><span class="label">Counter</span><b>1,270</b></div><div class="metric"><span class="label">Slow cycles</span><b>4</b></div></div></article>
+      <article class="station fault"><div class="title">Assembly <span class="state">FAULT</span></div><div class="id">ST02 · Auto mode</div><div class="metrics"><div class="metric"><span class="label">Last cycle</span><b>—</b></div><div class="metric"><span class="label">Alarm code</span><b class="bad">E203</b></div><div class="metric"><span class="label">Counter</span><b>1,260</b></div><div class="metric"><span class="label">Last update</span><b>00:12</b></div></div></article>
+      <article class="station"><div class="title">EOLT <span class="state">RUNNING</span></div><div class="id">ST03 · Auto mode</div><div class="metrics"><div class="metric"><span class="label">Last cycle</span><b class="warn">22.8 s</b></div><div class="metric"><span class="label">Target</span><b>20.0 s</b></div><div class="metric"><span class="label">Counter</span><b>1,252</b></div><div class="metric"><span class="label">Slow cycles</span><b class="warn">29</b></div></div></article>
+      <article class="station idle"><div class="title">Packaging <span class="state">IDLE</span></div><div class="id">ST04 · Output station</div><div class="metrics"><div class="metric"><span class="label">Last cycle</span><b>11.6 s</b></div><div class="metric"><span class="label">Target</span><b>12.0 s</b></div><div class="metric"><span class="label">Counter</span><b class="ok">1,248</b></div><div class="metric"><span class="label">Slow cycles</span><b>5</b></div></div></article>
+    </div>
+    <div class="bottom"><section class="panel"><h2>Attention required</h2><div class="row"><div><b>ST02 · Assembly</b><div class="sub">Alarm E203 · Safety gate open</div></div><span class="tag red">FAULT</span></div><div class="row"><div><b>ST04 · Packaging</b><div class="sub">Waiting for the upstream station</div></div><span class="tag orange">IDLE</span></div></section><section class="panel"><h2>OPC UA endpoint health</h2><div class="row"><div><b>BMW-SZL-PLC</b><div class="sub">opc.tcp://plc-bmw-szl:4840</div></div><span class="tag" style="background:#123725;color:#31d18b">CONNECTED</span></div><div class="row"><div><b>Last PLC heartbeat</b><div class="sub">All subscriptions healthy</div></div><b>just now</b></div></section></div>
+    <footer>Demo data · Update every 1 second when OPC UA is active</footer>
+  </main>
+</body>
+</html>
