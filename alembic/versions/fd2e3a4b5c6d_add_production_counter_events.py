@@ -14,6 +14,19 @@ depends_on = None
 
 
 def upgrade() -> None:
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    if inspector.has_table("production_counter_events"):
+        # A reporting deployment created this dataset before the Edge API was
+        # released.  It already has the required event columns (with wider
+        # varchar/integer types), so retain its data and only register this
+        # revision.  Do not recreate or alter a live warehouse table here.
+        existing = {column["name"] for column in inspector.get_columns("production_counter_events")}
+        required = {"id", "tenant_id", "source_event_id", "line_id", "counter_id", "counter_name", "counter_epoch", "observed_at", "quantity", "ok_quantity", "nok_quantity", "delta_quantity", "delta_ok", "delta_nok", "reset_detected", "received_at"}
+        missing = required - existing
+        if missing:
+            raise RuntimeError(f"Existing production_counter_events table is missing: {', '.join(sorted(missing))}")
+        return
     op.create_table("production_counter_events",
         sa.Column("id", sa.BigInteger(), primary_key=True), sa.Column("source_event_id", sa.String(64), nullable=False),
         sa.Column("line_id", sa.String(100), nullable=False), sa.Column("counter_id", sa.String(100), nullable=False), sa.Column("counter_name", sa.String(100), nullable=False),
