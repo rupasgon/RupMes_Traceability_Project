@@ -554,6 +554,31 @@ class StoppageBatchIngestResult(BaseModel):
     updated: int
 
 
+class ProductionCounterEventIngest(BaseModel):
+    source_event_id: str = Field(..., min_length=1, max_length=64)
+    line_id: str = Field(..., min_length=1, max_length=100)
+    counter_id: str = Field(..., min_length=1, max_length=100)
+    counter_name: str = Field(..., min_length=1, max_length=100)
+    counter_epoch: int = Field(..., ge=0)
+    observed_at: datetime
+    quantity: Decimal = Field(..., ge=0, decimal_places=3)
+    ok_quantity: Decimal = Field(..., ge=0, decimal_places=3)
+    nok_quantity: Decimal = Field(..., ge=0, decimal_places=3)
+    delta_quantity: Decimal | None = Field(None, ge=0, decimal_places=3)
+    delta_ok: Decimal | None = Field(None, ge=0, decimal_places=3)
+    delta_nok: Decimal | None = Field(None, ge=0, decimal_places=3)
+    reset_detected: bool = False
+
+
+class ProductionCounterBatchIngest(BaseModel):
+    events: list[ProductionCounterEventIngest] = Field(..., min_length=1, max_length=200)
+
+
+class ProductionCounterBatchIngestResult(BaseModel):
+    accepted: int
+    inserted: int
+
+
 class ProductionReportRead(BaseModel):
     id: int
     plant_code: Optional[str]

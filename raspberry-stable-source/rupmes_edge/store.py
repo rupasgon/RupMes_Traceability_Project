@@ -34,6 +34,10 @@ class EdgeStore:
             CREATE INDEX IF NOT EXISTS ix_stoppage_events_station_started ON stoppage_events(station_id, started_at);
             CREATE UNIQUE INDEX IF NOT EXISTS ux_stoppage_events_open_station ON stoppage_events(station_id) WHERE ended_at IS NULL;
             CREATE TABLE IF NOT EXISTS stoppage_sync_state (event_id TEXT PRIMARY KEY, synced_updated_at TEXT NOT NULL, synced_at TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS production_counter_state (counter_id TEXT PRIMARY KEY, line_id TEXT NOT NULL, counter_name TEXT NOT NULL, counter_epoch INTEGER NOT NULL, quantity REAL NOT NULL, ok_quantity REAL NOT NULL, nok_quantity REAL NOT NULL, observed_at TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS production_counter_events (id TEXT PRIMARY KEY, line_id TEXT NOT NULL, counter_id TEXT NOT NULL, counter_name TEXT NOT NULL, counter_epoch INTEGER NOT NULL, observed_at TEXT NOT NULL, quantity REAL NOT NULL, ok_quantity REAL NOT NULL, nok_quantity REAL NOT NULL, delta_quantity REAL, delta_ok REAL, delta_nok REAL, reset_detected INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL);
+            CREATE INDEX IF NOT EXISTS ix_production_counter_events_line_time ON production_counter_events(line_id, observed_at);
+            CREATE TABLE IF NOT EXISTS production_counter_sync_state (event_id TEXT PRIMARY KEY, synced_at TEXT NOT NULL);
         """)
         # Existing installations created the table before the detail column
         # existed.  Keep this migration deliberately small and idempotent.
@@ -106,6 +110,45 @@ class EdgeStore:
                 "ON CONFLICT(event_id) DO UPDATE SET synced_updated_at=excluded.synced_updated_at,synced_at=excluded.synced_at",
                 [(event["id"], event["updated_at"], now) for event in events],
             )
+            self.connection.commit()
+
+    def record_production_counter(self, line_id: str, counter_id: str, counter_name: str, quantity: object, ok_quantity: object, nok_quantity: object, observed_at: datetime) -> None:
+        """Persist one changed, fully-read PLC counter snapshot.
+
+        The first complete snapshot establishes the baseline; it is not a
+        historical production event.  This prevents a service restart from
+        replaying the whole PLC counter as new production.
+        """
+        try:
+            current = tuple(float(value) for value in (quantity, ok_quantity, nok_quantity))
+        except (TypeError, ValueError):
+            return
+        with self._lock:
+            previous = self.connection.execute("SELECT * FROM production_counter_state WHERE counter_id=?", (counter_id,)).fetchone()
+            if previous is None:
+                self.connection.execute("INSERT INTO production_counter_state(counter_id,line_id,counter_name,counter_epoch,quantity,ok_quantity,nok_quantity,observed_at) VALUES (?,?,?,?,?,?,?,?)", (counter_id, line_id, counter_name, 0, *current, observed_at.isoformat()))
+                self.connection.commit()
+                return
+            prior = (float(previous["quantity"]), float(previous["ok_quantity"]), float(previous["nok_quantity"]))
+            if current == prior:
+                return
+            reset = any(new < old for new, old in zip(current, prior, strict=True))
+            epoch = int(previous["counter_epoch"]) + int(reset)
+            deltas = (None, None, None) if reset else tuple(round(new - old, 3) for new, old in zip(current, prior, strict=True))
+            event = {"id": str(uuid.uuid4()), "line_id": line_id, "counter_id": counter_id, "counter_name": counter_name, "counter_epoch": epoch, "observed_at": observed_at.isoformat(), "quantity": current[0], "ok_quantity": current[1], "nok_quantity": current[2], "delta_quantity": deltas[0], "delta_ok": deltas[1], "delta_nok": deltas[2], "reset_detected": int(reset), "created_at": datetime.now(timezone.utc).isoformat()}
+            self.connection.execute("INSERT INTO production_counter_events(id,line_id,counter_id,counter_name,counter_epoch,observed_at,quantity,ok_quantity,nok_quantity,delta_quantity,delta_ok,delta_nok,reset_detected,created_at) VALUES (:id,:line_id,:counter_id,:counter_name,:counter_epoch,:observed_at,:quantity,:ok_quantity,:nok_quantity,:delta_quantity,:delta_ok,:delta_nok,:reset_detected,:created_at)", event)
+            self.connection.execute("UPDATE production_counter_state SET line_id=?,counter_name=?,counter_epoch=?,quantity=?,ok_quantity=?,nok_quantity=?,observed_at=? WHERE counter_id=?", (line_id, counter_name, epoch, *current, observed_at.isoformat(), counter_id))
+            self.connection.commit()
+
+    def pending_production_counter_sync(self, limit: int = 100) -> list[dict]:
+        with self._lock:
+            rows = self.connection.execute("SELECT event.* FROM production_counter_events event LEFT JOIN production_counter_sync_state sync ON sync.event_id=event.id WHERE sync.event_id IS NULL ORDER BY event.observed_at LIMIT ?", (limit,)).fetchall()
+            return [dict(row) for row in rows]
+
+    def mark_production_counters_synced(self, events: list[dict]) -> None:
+        with self._lock:
+            now = datetime.now(timezone.utc).isoformat()
+            self.connection.executemany("INSERT OR REPLACE INTO production_counter_sync_state(event_id,synced_at) VALUES (?,?)", [(event["id"], now) for event in events])
             self.connection.commit()
 
     def open_stoppage(self, line_id, station_id, reason, source_state, started_at, shift, confidence) -> dict:

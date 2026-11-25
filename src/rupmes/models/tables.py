@@ -539,6 +539,34 @@ class StoppageEvent(Base):
     )
 
 
+class ProductionCounterEvent(Base):
+    """Immutable counter change received from an Edge device."""
+
+    __tablename__ = "production_counter_events"
+    id: Mapped[int] = mapped_column(BigInteger().with_variant(Integer, "sqlite"), Identity(), primary_key=True)
+    source_event_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    line_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    counter_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    counter_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    counter_epoch: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    quantity: Mapped[float] = mapped_column(Numeric(18, 3), nullable=False)
+    ok_quantity: Mapped[float] = mapped_column(Numeric(18, 3), nullable=False)
+    nok_quantity: Mapped[float] = mapped_column(Numeric(18, 3), nullable=False)
+    delta_quantity: Mapped[float | None] = mapped_column(Numeric(18, 3))
+    delta_ok: Mapped[float | None] = mapped_column(Numeric(18, 3))
+    delta_nok: Mapped[float | None] = mapped_column(Numeric(18, 3))
+    reset_detected: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("FALSE"))
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP"), nullable=False)
+    tenant_id: Mapped[str] = mapped_column(String(50), ForeignKey("tb_tenants.tenant_id"), nullable=False, server_default=text("'DEFAULT'"))
+    __table_args__ = (
+        CheckConstraint("counter_epoch >= 0", name="ck_production_counter_events_epoch_non_negative"),
+        CheckConstraint("quantity >= 0 AND ok_quantity >= 0 AND nok_quantity >= 0", name="ck_production_counter_events_quantities_non_negative"),
+        UniqueConstraint("tenant_id", "source_event_id", name="uq_production_counter_events_source_event"),
+        Index("ix_production_counter_events_tenant_line_time", "tenant_id", "line_id", "observed_at"),
+    )
+
+
 class ProductionIngestClient(Base):
     __tablename__ = "production_ingest_clients"
 

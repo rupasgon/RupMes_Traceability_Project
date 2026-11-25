@@ -13,6 +13,7 @@ class EdgeRuntime:
 
     def __init__(self, line_name: str, stations: list[StationDefinition], store=None, production_counters=None, line_cycle_config=None, *, line_id=None, timezone_name="Europe/Madrid", stoppage_policy=None):
         self.line_name = line_name
+        self.line_id = line_id or line_name
         self.stations = {definition.station_id: LiveStation(definition) for definition in stations}
         self.endpoint_health: dict[str, tuple[bool, str | None]] = {}
         self._endpoint_was_connected: dict[str, bool] = {}
@@ -53,6 +54,11 @@ class EdgeRuntime:
         with self._lock:
             if counter_id in self.line_counters:
                 self.line_counters[counter_id][metric] = value
+                # MetricPollCollector reads quantity, OK, then NOK.  At NOK
+                # the three values form one coherent PLC snapshot.
+                if self.store and metric == "nok":
+                    counter = self.line_counters[counter_id]
+                    self.store.record_production_counter(self.line_id, counter_id, counter["name"], counter["quantity"], counter["ok"], counter["nok"], observed_at)
 
     async def apply_line_cycle_update(self, metric: str, value: Any, observed_at: datetime) -> None:
         with self._lock:

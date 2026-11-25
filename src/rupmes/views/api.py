@@ -113,7 +113,7 @@ from rupmes.models import (
     TbTenants,
     TbUsers,
 )
-from rupmes.models import IntegrationDeliveryRule, IntegrationServer, ProductionIngestClient, StoppageEvent, TraceabilityMeasurement
+from rupmes.models import IntegrationDeliveryRule, IntegrationServer, ProductionIngestClient, ProductionCounterEvent, StoppageEvent, TraceabilityMeasurement
 from rupmes.services.security import hash_password
 from rupmes.services.integration_credentials import decrypt_oauth_credentials, encrypt_oauth_credentials
 from rupmes.views.auth import (
@@ -175,6 +175,8 @@ from rupmes.views.schemas import (
     ProductionReportCreate,
     ProductionReportIngestCreate,
     ProductionReportRead,
+    ProductionCounterBatchIngest,
+    ProductionCounterBatchIngestResult,
     StoppageBatchIngest,
     StoppageBatchIngestResult,
     StatusCreate,
@@ -965,6 +967,26 @@ def ingest_stoppage_events_endpoint(payload: StoppageBatchIngest, request: Reque
             updated += 1
     db.commit()
     return StoppageBatchIngestResult(accepted=len(payload.events), inserted=inserted, updated=updated)
+
+
+@app.post("/production-counter-events/ingest", response_model=ProductionCounterBatchIngestResult)
+def ingest_production_counter_events_endpoint(payload: ProductionCounterBatchIngest, request: Request, db: Session = Depends(get_db)):
+    """Idempotently ingest durable Edge counter changes without serial numbers."""
+    client = require_production_ingest_api_key(request, db)
+    tenant_id = client.tenant_id if client is not None else get_default_tenant_id()
+    inserted = 0
+    for item in payload.events:
+        if client is not None and client.line_code and item.line_id != client.line_code:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Line scope mismatch")
+        existing = db.execute(select(ProductionCounterEvent.id).where(
+            ProductionCounterEvent.tenant_id == tenant_id,
+            ProductionCounterEvent.source_event_id == item.source_event_id,
+        )).scalar_one_or_none()
+        if existing is None:
+            db.add(ProductionCounterEvent(**item.model_dump(), tenant_id=tenant_id))
+            inserted += 1
+    db.commit()
+    return ProductionCounterBatchIngestResult(accepted=len(payload.events), inserted=inserted)
 
 
 @app.get("/production-reports/analytics/daily-total", response_model=list[DailyProductionTotalRead])
